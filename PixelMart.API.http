@@ -1,0 +1,6 @@
+@PixelMart.API_HostAddress = http://localhost:5242
+
+GET {{PixelMart.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
