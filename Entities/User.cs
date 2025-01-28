@@ -1,6 +1,5 @@
-﻿namespace PixelMart.API.Entities
+﻿namespace PixelMart.API.Entities;
+
+public class User
 {
-    public class User
-    {
-    }
 }
