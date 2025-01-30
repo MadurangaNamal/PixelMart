@@ -1,37 +1,72 @@
-﻿using PixelMart.API.Entities;
+﻿using Microsoft.EntityFrameworkCore;
+using PixelMart.API.DbContexts;
+using PixelMart.API.Entities;
 
 namespace PixelMart.API.Services;
 
 public class PixelMartRepository : IPixelMartRepository
 {
+    private readonly PixelMartDbContext _context;
+
+    public PixelMartRepository(PixelMartDbContext context)
+    {
+        _context = context ?? throw new ArgumentNullException(nameof(context));
+    }
+
     public void AddCategory(Category category)
     {
-        throw new NotImplementedException();
+        ArgumentNullException.ThrowIfNull(category);
+
+        category.Id = Guid.NewGuid();
+
+        foreach (var product in category.Products)
+        {
+            product.Id = Guid.NewGuid();
+        }
+
+        _context.Categories.Add(category);
     }
 
     public void AddProduct(Guid categoryId, Product product)
     {
-        throw new NotImplementedException();
+        if (categoryId == Guid.Empty)
+        {
+            throw new ArgumentException("Category ID cannot be empty.", nameof(categoryId));
+        }
+
+        ArgumentNullException.ThrowIfNull(product);
+
+        product.CategoryId = categoryId;
+        _context.Products.Add(product);
     }
 
-    public Task<bool> CategoryExistsAsync(Guid categoryId)
+    public async Task<bool> CategoryExistsAsync(Guid categoryId)
     {
-        throw new NotImplementedException();
+        if (categoryId == Guid.Empty)
+        {
+            throw new ArgumentException("Category ID cannot be empty.", nameof(categoryId));
+        }
+
+        return await _context.Categories.AnyAsync(c => c.Id == categoryId);
     }
 
     public void DeleteCategory(Category category)
     {
-        throw new NotImplementedException();
+        ArgumentNullException.ThrowIfNull(category);
+
+        _context.Categories.Remove(category);
     }
 
     public void DeleteProduct(Product product)
     {
-        throw new NotImplementedException();
+        ArgumentNullException.ThrowIfNull(product);
+
+        _context.Products.Remove(product);
     }
 
-    public Task<IEnumerable<Category>> GetCategoriesAsync()
+    public async Task<IEnumerable<Category>> GetCategoriesAsync()
     {
-        throw new NotImplementedException();
+        return await _context.Categories.ToListAsync();
     }
 
     public Task<IEnumerable<Category>> GetCategoriesAsync(IEnumerable<Guid> categoryIds)
@@ -39,24 +74,50 @@ public class PixelMartRepository : IPixelMartRepository
         throw new NotImplementedException();
     }
 
-    public Task<Category> GetCategoryAsync(Guid categoryId)
+    public async Task<Category> GetCategoryAsync(Guid categoryId)
     {
-        throw new NotImplementedException();
+        if (categoryId == Guid.Empty)
+        {
+            throw new ArgumentException("Category ID cannot be empty.", nameof(categoryId));
+        }
+
+#pragma warning disable CS8603 // Possible null reference return.
+        return await _context.Categories.FirstOrDefaultAsync(c => c.Id == categoryId);
+#pragma warning restore CS8603 // Possible null reference return.
+
     }
 
-    public Task<Product> GetproductAsync(Guid categoryId, Guid productId)
+    public async Task<Product> GetproductAsync(Guid categoryId, Guid productId)
     {
-        throw new NotImplementedException();
+        if (categoryId == Guid.Empty)
+        {
+            throw new ArgumentNullException(nameof(categoryId));
+        }
+
+        if (productId == Guid.Empty)
+        {
+            throw new ArgumentNullException(nameof(productId));
+        }
+
+#pragma warning disable CS8603 // Possible null reference return.
+        return await _context.Products.Where(p => p.Id == productId && p.CategoryId == categoryId).FirstOrDefaultAsync();
+#pragma warning restore CS8603 // Possible null reference return.
+
     }
 
-    public Task<IEnumerable<Product>> GetProductsAsync(Guid categoryId)
+    public async Task<IEnumerable<Product>> GetProductsAsync(Guid categoryId)
     {
-        throw new NotImplementedException();
+        if (categoryId == Guid.Empty)
+        {
+            throw new ArgumentNullException(nameof(categoryId));
+        }
+
+        return await _context.Products.Where(p => p.CategoryId == categoryId).OrderBy(p => p.Name).ToListAsync();
     }
 
-    public Task<bool> SaveAsync()
+    public async Task<bool> SaveAsync()
     {
-        throw new NotImplementedException();
+        return (await _context.SaveChangesAsync() >= 0);
     }
 
     public void UpdateCategory(Category category)

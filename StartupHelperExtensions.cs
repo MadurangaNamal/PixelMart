@@ -13,7 +13,15 @@ internal static class StartupHelperExtensions
         builder.Services.AddDbContext<PixelMartDbContext>(options =>
             options.UseSqlServer(connectionString));
 
-        builder.Services.AddControllers();
+        builder.Services.AddControllers(configure =>
+        {
+            configure.ReturnHttpNotAcceptable = true;
+        })
+        .AddNewtonsoftJson()
+        .AddXmlDataContractSerializerFormatters();
+
+
+
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
 
