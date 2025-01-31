@@ -17,10 +17,10 @@ public class Product
     [MaxLength(100)]
     public string Name { get; set; }
 
-    [MaxLength(100)]
+    [MaxLength(250)]
     public string Brand { get; set; } = string.Empty;
 
-    [MaxLength(1000)]
+    [MaxLength(1500)]
     public string? Description { get; set; }
 
     [ForeignKey("CategoryId")]

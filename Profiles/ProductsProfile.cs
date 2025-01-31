@@ -8,5 +8,9 @@ public class ProductsProfile : Profile
     {
         CreateMap<Entities.Product, Models.ProductDto>()
             .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => $"{src.Brand} {src.Name}"));
+
+        CreateMap<Models.ProductForCreationDto, Entities.Product>();
+
+        CreateMap<Models.ProductForUpdateDto, Entities.Product>().ReverseMap();
     }
 }
