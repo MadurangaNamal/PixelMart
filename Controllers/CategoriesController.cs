@@ -7,5 +7,4 @@ namespace PixelMart.API.Controllers;
 public class CategoriesController : ControllerBase
 {
 
-
 }

@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PixelMart.API.Entities;
 
-public class Stock
+public class OrderItem
 {
     [Key]
     public Guid Id { get; set; }
@@ -12,17 +12,16 @@ public class Stock
     public int Quantity { get; set; }
 
     [Required]
-    public int Threshold { get; set; } = 10;
+    public decimal UnitPrice { get; set; }
 
-    public DateTime LastUpdated { get; set; } = DateTime.UtcNow;
-
-    // Foreign key (1:1 with Product)
+    // Foreign keys
+    public Guid OrderId { get; set; }
     public Guid ProductId { get; set; }
 
-    // Navigation property
+    // Navigation properties
+    [ForeignKey("OrderId")]
+    public Order Order { get; set; } = null!;
+
     [ForeignKey("ProductId")]
     public Product Product { get; set; } = null!;
-
-    public bool IsLowStock => Quantity <= Threshold;
-
 }

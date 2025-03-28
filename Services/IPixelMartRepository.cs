@@ -1,4 +1,6 @@
 ﻿using PixelMart.API.Entities;
+using PixelMart.API.Helpers;
+using PixelMart.API.ResourceParameters;
 
 namespace PixelMart.API.Services;
 

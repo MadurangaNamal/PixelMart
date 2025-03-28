@@ -162,6 +162,7 @@ public class ProductsController : ControllerBase
         {
             return NotFound();
         }
+
         var productFromRepo = await _pixelMartRepository.GetproductAsync(categoryId, productId);
 
         if (productFromRepo == null)

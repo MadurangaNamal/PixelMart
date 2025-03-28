@@ -24,7 +24,10 @@ public class Product
     public string? Description { get; set; }
 
     [ForeignKey("CategoryId")]
-    public Category Category { get; set; } = null!;
+    public Category? Category { get; set; }
+
+    // Stock relationship (1:1)
+    public Stock? Stock { get; set; }
 
     public Guid CategoryId { get; set; }
 }

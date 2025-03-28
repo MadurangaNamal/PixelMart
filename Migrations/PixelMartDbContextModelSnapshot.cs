@@ -35,7 +35,7 @@ namespace PixelMart.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories");
+                    b.ToTable("Categories", (string)null);
                 });
 
             modelBuilder.Entity("PixelMart.API.Entities.Product", b =>
@@ -65,7 +65,7 @@ namespace PixelMart.API.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("Products");
+                    b.ToTable("Products", (string)null);
                 });
 
             modelBuilder.Entity("PixelMart.API.Entities.Product", b =>

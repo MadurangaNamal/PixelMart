@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PixelMart.API.DbContexts;
 using PixelMart.API.Entities;
+using PixelMart.API.Helpers;
+using PixelMart.API.ResourceParameters;
 
 namespace PixelMart.API.Services;
 
@@ -129,4 +131,12 @@ public class PixelMartRepository : IPixelMartRepository
     {
         throw new NotImplementedException();
     }
+
+    //public async Task<PagedList<Category>> GetCategoriesAsync(
+    //    CategoriesResourceParameters categoriesResourceParameters)
+    //{
+    //    ArgumentNullException.ThrowIfNull(categoriesResourceParameters);
+
+    //    return 
+    //}
 }
