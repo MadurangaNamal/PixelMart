@@ -11,13 +11,12 @@ public class CartItem
     [Required]
     public int Quantity { get; set; } = 1;
 
-    // Foreign keys
     public Guid ShoppingCartId { get; set; }
-    public Guid ProductId { get; set; }
 
-    // Navigation properties
     [ForeignKey("ShoppingCartId")]
     public ShoppingCart ShoppingCart { get; set; } = null!;
+
+    public Guid ProductId { get; set; }
 
     [ForeignKey("ProductId")]
     public Product Product { get; set; } = null!;

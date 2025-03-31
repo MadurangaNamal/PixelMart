@@ -14,13 +14,12 @@ public class OrderItem
     [Required]
     public decimal UnitPrice { get; set; }
 
-    // Foreign keys
     public Guid OrderId { get; set; }
-    public Guid ProductId { get; set; }
 
-    // Navigation properties
     [ForeignKey("OrderId")]
     public Order Order { get; set; } = null!;
+
+    public Guid ProductId { get; set; }
 
     [ForeignKey("ProductId")]
     public Product Product { get; set; } = null!;

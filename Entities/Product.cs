@@ -5,6 +5,10 @@ namespace PixelMart.API.Entities;
 
 public class Product
 {
+    public Product()
+    {
+    }
+
     public Product(string name)
     {
         Name = name;
@@ -23,11 +27,10 @@ public class Product
     [MaxLength(1500)]
     public string? Description { get; set; }
 
+    public Guid CategoryId { get; set; }
+
     [ForeignKey("CategoryId")]
     public Category? Category { get; set; }
 
-    // Stock relationship (1:1)
     public Stock? Stock { get; set; }
-
-    public Guid CategoryId { get; set; }
 }

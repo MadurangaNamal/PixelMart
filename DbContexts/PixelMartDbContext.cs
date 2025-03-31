@@ -70,15 +70,15 @@ public class PixelMartDbContext : DbContext
             .HasIndex(o => o.OrderNumber)
             .IsUnique();
 
-        //modelBuilder.Entity<Order>()
-        //    .Property(p => p.TotalAmount)
-        //    .HasPrecision(18, 2);
+        modelBuilder.Entity<Order>()
+            .Property(p => p.TotalAmount)
+            .HasPrecision(18, 2);
 
-        //modelBuilder.Entity<OrderItem>()
-        //    .Property(p => p.UnitPrice)
-        //    .HasPrecision(18, 2);
+        modelBuilder.Entity<OrderItem>()
+            .Property(p => p.UnitPrice)
+            .HasPrecision(18, 2);
 
-        SeedData(modelBuilder);
+        //SeedData(modelBuilder);
     }
 
     private void SeedData(ModelBuilder modelBuilder)

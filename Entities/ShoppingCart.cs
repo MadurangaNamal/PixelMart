@@ -13,5 +13,5 @@ public class ShoppingCart
     // Navigation properties
     public ICollection<CartItem> Items { get; set; } = [];
 
-    public string UserId { get; set; } = null!;
+    //public string UserId { get; set; } = null!;
 }

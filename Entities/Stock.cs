@@ -24,5 +24,4 @@ public class Stock
     public Product Product { get; set; } = null!;
 
     public bool IsLowStock => Quantity <= Threshold;
-
 }

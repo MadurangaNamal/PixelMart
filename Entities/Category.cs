@@ -4,6 +4,15 @@ namespace PixelMart.API.Entities;
 
 public class Category
 {
+    public Category()
+    {
+    }
+
+    public Category(string name)
+    {
+        Name = name;
+    }
+
     [Key]
     public Guid Id { get; set; }
 
@@ -11,10 +20,5 @@ public class Category
     [MaxLength(50)]
     public string Name { get; set; }
 
-    public ICollection<Product> Products { get; set; } = [];
-
-    public Category(string name)
-    {
-        Name = name;
-    }
+    public ICollection<Product> Products { get; set; } = new List<Product>();
 }

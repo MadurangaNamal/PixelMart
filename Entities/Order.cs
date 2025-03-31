@@ -28,7 +28,6 @@ public class Order
     [MaxLength(500)]
     public string ShippingAddress { get; set; } = null!;
 
-    // Navigation properties
     public ICollection<OrderItem> Items { get; set; } = [];
 
     // Foreign key for user
