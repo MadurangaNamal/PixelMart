@@ -85,27 +85,16 @@ public class PixelMartDbContext : DbContext
     {
         var electronicsId = Guid.NewGuid();
         var clothingId = Guid.NewGuid();
+        var kitchenItemsId = Guid.NewGuid();
+        var groceriesId = Guid.NewGuid();
+        var foodItemsId = Guid.NewGuid();
 
         modelBuilder.Entity<Category>().HasData(
+            new Category("Clothing") { Id = clothingId },
             new Category("Electronics") { Id = electronicsId },
-            new Category("Clothing") { Id = clothingId }
-        );
-
-        modelBuilder.Entity<Product>().HasData(
-            new Product("Smartphone X")
-            {
-                Id = Guid.NewGuid(),
-                CategoryId = electronicsId,
-                Brand = "TechBrand",
-                Description = "Latest smartphone with advanced features"
-            },
-            new Product("T-Shirt")
-            {
-                Id = Guid.NewGuid(),
-                CategoryId = clothingId,
-                Brand = "FashionCo",
-                Description = "Comfortable cotton t-shirt"
-            }
+            new Category("Kitchen Items") { Id = kitchenItemsId },
+            new Category("Groceries") { Id = groceriesId },
+            new Category("Foods") { Id = foodItemsId }
         );
     }
 }

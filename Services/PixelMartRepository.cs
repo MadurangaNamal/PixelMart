@@ -1,8 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PixelMart.API.DbContexts;
 using PixelMart.API.Entities;
-using PixelMart.API.Helpers;
-using PixelMart.API.ResourceParameters;
 
 namespace PixelMart.API.Services;
 
@@ -18,12 +16,14 @@ public class PixelMartRepository : IPixelMartRepository
     public void AddCategory(Category category)
     {
         ArgumentNullException.ThrowIfNull(category);
-
         category.Id = Guid.NewGuid();
 
-        foreach (var product in category.Products)
+        if (category.Products.Any())
         {
-            product.Id = Guid.NewGuid();
+            foreach (var product in category.Products)
+            {
+                product.Id = Guid.NewGuid();
+            }
         }
 
         _context.Categories.Add(category);
@@ -55,7 +55,6 @@ public class PixelMartRepository : IPixelMartRepository
     public void DeleteCategory(Category category)
     {
         ArgumentNullException.ThrowIfNull(category);
-
         _context.Categories.Remove(category);
     }
 
@@ -68,12 +67,7 @@ public class PixelMartRepository : IPixelMartRepository
 
     public async Task<IEnumerable<Category>> GetCategoriesAsync()
     {
-        return await _context.Categories.ToListAsync();
-    }
-
-    public Task<IEnumerable<Category>> GetCategoriesAsync(IEnumerable<Guid> categoryIds)
-    {
-        throw new NotImplementedException();
+        return await _context.Categories.Include(c => c.Products).ToListAsync();
     }
 
     public async Task<Category> GetCategoryAsync(Guid categoryId)
@@ -84,7 +78,7 @@ public class PixelMartRepository : IPixelMartRepository
         }
 
 #pragma warning disable CS8603 // Possible null reference return.
-        return await _context.Categories.FirstOrDefaultAsync(c => c.Id == categoryId);
+        return await _context.Categories.Include(c => c.Products).FirstOrDefaultAsync(c => c.Id == categoryId);
 #pragma warning restore CS8603 // Possible null reference return.
 
     }
@@ -102,7 +96,9 @@ public class PixelMartRepository : IPixelMartRepository
         }
 
 #pragma warning disable CS8603 // Possible null reference return.
-        return await _context.Products.Where(p => p.Id == productId && p.CategoryId == categoryId).FirstOrDefaultAsync();
+        return await _context.Products
+            .Where(p => p.Id == productId && p.CategoryId == categoryId)
+            .FirstOrDefaultAsync();
 #pragma warning restore CS8603 // Possible null reference return.
 
     }

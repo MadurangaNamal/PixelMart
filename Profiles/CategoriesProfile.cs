@@ -6,6 +6,10 @@ public class CategoriesProfile : Profile
 {
     public CategoriesProfile()
     {
-        CreateMap<Entities.Category, Models.CategoryDto>();
+        CreateMap<Entities.Category, Models.CategoryDto>().ReverseMap();
+
+        CreateMap<Models.CategoryForCreationDto, Entities.Category>();
+
+        CreateMap<Models.CategoryForUpdateDto, Entities.Category>();
     }
 }

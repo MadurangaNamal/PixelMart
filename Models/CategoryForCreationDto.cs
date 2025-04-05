@@ -1,11 +1,8 @@
 ﻿namespace PixelMart.API.Models;
 
-public class CategoryDto
+public class CategoryForCreationDto
 {
-    public Guid Id { get; set; }
-
     public string Name { get; set; } = string.Empty;
 
     public ICollection<ProductDto> Products { get; set; } = new List<ProductDto>();
-
 }

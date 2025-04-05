@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PixelMart.API.DbContexts;
+using PixelMart.API.Services;
 
 namespace PixelMart.API;
 
@@ -13,18 +14,19 @@ internal static class StartupHelperExtensions
         builder.Services.AddDbContext<PixelMartDbContext>(options =>
             options.UseSqlServer(connectionString));
 
+        builder.Services.AddScoped<IPixelMartRepository, PixelMartRepository>();
+
         builder.Services.AddControllers(configure =>
         {
             configure.ReturnHttpNotAcceptable = true;
-        })
-        .AddNewtonsoftJson()
+        }).AddNewtonsoftJson()
         .AddXmlDataContractSerializerFormatters();
 
 
 
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
-
+        builder.Services.AddAutoMapper(typeof(Program));
 
         return builder.Build();
     }

@@ -43,7 +43,7 @@ namespace PixelMart.API.Migrations
 
                     b.HasIndex("ShoppingCartId");
 
-                    b.ToTable("CartItems");
+                    b.ToTable("CartItems", (string)null);
                 });
 
             modelBuilder.Entity("PixelMart.API.Entities.Category", b =>
@@ -62,7 +62,7 @@ namespace PixelMart.API.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Categories");
+                    b.ToTable("Categories", (string)null);
                 });
 
             modelBuilder.Entity("PixelMart.API.Entities.Order", b =>
@@ -99,7 +99,7 @@ namespace PixelMart.API.Migrations
                     b.HasIndex("OrderNumber")
                         .IsUnique();
 
-                    b.ToTable("Orders");
+                    b.ToTable("Orders", (string)null);
                 });
 
             modelBuilder.Entity("PixelMart.API.Entities.OrderItem", b =>
@@ -127,7 +127,7 @@ namespace PixelMart.API.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("OrderItems");
+                    b.ToTable("OrderItems", (string)null);
                 });
 
             modelBuilder.Entity("PixelMart.API.Entities.Product", b =>
@@ -160,7 +160,7 @@ namespace PixelMart.API.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Products");
+                    b.ToTable("Products", (string)null);
                 });
 
             modelBuilder.Entity("PixelMart.API.Entities.ShoppingCart", b =>
@@ -174,7 +174,7 @@ namespace PixelMart.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ShoppingCarts");
+                    b.ToTable("ShoppingCarts", (string)null);
                 });
 
             modelBuilder.Entity("PixelMart.API.Entities.Stock", b =>
@@ -200,7 +200,7 @@ namespace PixelMart.API.Migrations
                     b.HasIndex("ProductId")
                         .IsUnique();
 
-                    b.ToTable("Stocks");
+                    b.ToTable("Stocks", (string)null);
                 });
 
             modelBuilder.Entity("PixelMart.API.Entities.CartItem", b =>
