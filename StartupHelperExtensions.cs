@@ -14,6 +14,8 @@ internal static class StartupHelperExtensions
         builder.Services.AddDbContext<PixelMartDbContext>(options =>
             options.UseSqlServer(connectionString));
 
+        builder.Services.AddTransient<IPropertyMappingService, PropertyMappingService>();
+        builder.Services.AddTransient<IPropertyCheckerService, PropertyCheckerService>();
         builder.Services.AddScoped<IPixelMartRepository, PixelMartRepository>();
 
         builder.Services.AddControllers(configure =>

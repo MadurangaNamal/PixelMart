@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Options;
 using PixelMart.API.Models;
+using PixelMart.API.ResourceParameters;
 using PixelMart.API.Services;
 
 namespace PixelMart.API.Controllers;
@@ -15,22 +16,46 @@ public class ProductsController : ControllerBase
 {
     private readonly IPixelMartRepository _pixelMartRepository;
     private readonly IMapper _mapper;
+    private readonly IPropertyMappingService _propertyMappingService;
 
-    public ProductsController(IPixelMartRepository pixelMartRepository, IMapper mapper)
+    public ProductsController(IPixelMartRepository pixelMartRepository,
+        IMapper mapper,
+        IPropertyMappingService propertyMappingService)
     {
         _pixelMartRepository = pixelMartRepository ?? throw new ArgumentNullException(nameof(pixelMartRepository));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+        _propertyMappingService = propertyMappingService;
     }
 
+    //[HttpGet(Name = "GetProductsForCategory")]
+    //public async Task<ActionResult<IEnumerable<ProductDto>>> GetProductsForCategory(Guid categoryId)
+    //{
+    //    if (!await _pixelMartRepository.CategoryExistsAsync(categoryId))
+    //    {
+    //        return NotFound();
+    //    }
+
+    //    var productsFromRepo = await _pixelMartRepository.GetProductsAsync(categoryId);
+    //    return Ok(_mapper.Map<IEnumerable<ProductDto>>(productsFromRepo));
+    //}
+
     [HttpGet(Name = "GetProductsForCategory")]
-    public async Task<ActionResult<IEnumerable<ProductDto>>> GetProductsForCategory(Guid categoryId)
+    public async Task<ActionResult<IEnumerable<ProductDto>>> GetProducts(Guid categoryId,
+        [FromQuery] ProductsResourceParameters productsResourceParameters)
     {
         if (!await _pixelMartRepository.CategoryExistsAsync(categoryId))
         {
             return NotFound();
         }
 
-        var productsFromRepo = await _pixelMartRepository.GetProductsAsync(categoryId);
+        if (!_propertyMappingService
+            .ValidMappingExistsFor<ProductDto, Entities.Product>(
+                productsResourceParameters.OrderBy))
+        {
+            return BadRequest();
+        }
+
+        var productsFromRepo = await _pixelMartRepository.GetProductsAsync(categoryId, productsResourceParameters);
         return Ok(_mapper.Map<IEnumerable<ProductDto>>(productsFromRepo));
     }
 

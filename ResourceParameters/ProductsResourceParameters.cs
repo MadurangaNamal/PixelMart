@@ -1,9 +1,8 @@
 ﻿namespace PixelMart.API.ResourceParameters;
 
-public class CategoriesResourceParameters
+public class ProductsResourceParameters
 {
     const int maxPageSize = 20;
-    public string? MainCategory { get; set; }
     public string? SearchQuery { get; set; }
     public int PageNumber { get; set; } = 1;
 

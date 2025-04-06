@@ -1,16 +1,22 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PixelMart.API.DbContexts;
 using PixelMart.API.Entities;
+using PixelMart.API.Helpers;
+using PixelMart.API.Models;
+using PixelMart.API.ResourceParameters;
 
 namespace PixelMart.API.Services;
 
 public class PixelMartRepository : IPixelMartRepository
 {
     private readonly PixelMartDbContext _context;
+    private readonly IPropertyMappingService _propertyMappingService;
 
-    public PixelMartRepository(PixelMartDbContext context)
+    public PixelMartRepository(PixelMartDbContext context, IPropertyMappingService propertyMappingService)
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));
+        _propertyMappingService = propertyMappingService ??
+            throw new ArgumentNullException(nameof(propertyMappingService));
     }
 
     public void AddCategory(Category category)
@@ -110,7 +116,43 @@ public class PixelMartRepository : IPixelMartRepository
             throw new ArgumentNullException(nameof(categoryId));
         }
 
-        return await _context.Products.Where(p => p.CategoryId == categoryId).OrderBy(p => p.Name).ToListAsync();
+        return await _context.Products
+            .Where(p => p.CategoryId == categoryId)
+            .OrderBy(p => p.Name)
+            .ToListAsync();
+    }
+
+    public async Task<PagedList<Product>> GetProductsAsync(
+        Guid categoryId,
+        ProductsResourceParameters productsResourceParameters)
+    {
+        if (productsResourceParameters == null)
+        {
+            throw new ArgumentNullException(nameof(productsResourceParameters));
+        }
+
+        var productsCollection = _context.Products as IQueryable<Product>;
+
+        if (!string.IsNullOrWhiteSpace(productsResourceParameters.SearchQuery))
+        {
+            var searchQuery = productsResourceParameters.SearchQuery.Trim();
+            productsCollection = productsCollection.Where(a => a.Name.Contains(searchQuery) || a.Brand.Contains(searchQuery));
+        }
+
+        if (!string.IsNullOrWhiteSpace(productsResourceParameters.OrderBy))
+        {
+            // get property mapping dictionary
+            var authorPropertyMappingDictionary = _propertyMappingService.GetPropertyMapping<ProductDto, Product>();
+
+#pragma warning disable S1854 // Unused assignments should be removed
+            productsCollection = productsCollection.ApplySort(productsResourceParameters.OrderBy, authorPropertyMappingDictionary);
+#pragma warning restore S1854 // Unused assignments should be removed
+
+        }
+
+        return await PagedList<Product>.CreateAsync(productsCollection,
+             productsResourceParameters.PageNumber,
+             productsResourceParameters.PageSize);
     }
 
     public async Task<bool> SaveAsync()
@@ -120,19 +162,13 @@ public class PixelMartRepository : IPixelMartRepository
 
     public void UpdateCategory(Category category)
     {
-        throw new NotImplementedException();
+        ArgumentNullException.ThrowIfNull(category);
+        _context.Categories.Update(category);
     }
 
     public void UpdateProduct(Product product)
     {
-        throw new NotImplementedException();
+        ArgumentNullException.ThrowIfNull(product);
+        _context.Products.Update(product);
     }
-
-    //public async Task<PagedList<Category>> GetCategoriesAsync(
-    //    CategoriesResourceParameters categoriesResourceParameters)
-    //{
-    //    ArgumentNullException.ThrowIfNull(categoriesResourceParameters);
-
-    //    return 
-    //}
 }

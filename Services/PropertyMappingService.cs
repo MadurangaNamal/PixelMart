@@ -1,22 +1,29 @@
-﻿
+﻿using PixelMart.API.Entities;
+using PixelMart.API.Models;
+
 namespace PixelMart.API.Services;
 
 public class PropertyMappingService : IPropertyMappingService
 {
-    private readonly IList<IPropertyMapping> _propertyMappings =
-        new List<IPropertyMapping>();
+    private readonly Dictionary<string, PropertyMappingValue> _productPropertyMapping = new(StringComparer.OrdinalIgnoreCase)
+        {
+            { "Id", new(new[] { "Id" }) },
+            { "Name", new(new[] { "Name" }) },
+            { "FullName", new(new[] { "Brand","Name" }) }
+        };
+
+    private readonly IList<IPropertyMapping> _propertyMappings = new List<IPropertyMapping>();
 
     public PropertyMappingService()
     {
-
+        _propertyMappings.Add(new PropertyMapping<ProductDto, Product>(_productPropertyMapping));
     }
 
     public Dictionary<string, PropertyMappingValue> GetPropertyMapping<TSource, TDestination>()
     {
 
         // get matching mapping
-        var matchingMapping = _propertyMappings
-            .OfType<PropertyMapping<TSource, TDestination>>();
+        var matchingMapping = _propertyMappings.OfType<PropertyMapping<TSource, TDestination>>();
 
         if (matchingMapping.Count() == 1)
         {
