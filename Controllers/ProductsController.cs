@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Options;
 using PixelMart.API.Models;
+using PixelMart.API.Models.Identity;
 using PixelMart.API.ResourceParameters;
 using PixelMart.API.Services;
 
@@ -77,6 +79,7 @@ public class ProductsController : ControllerBase
         return Ok(_mapper.Map<ProductDto>(productFromRepo));
     }
 
+    [Authorize(Roles = UserRoles.Admin)]
     [HttpPost(Name = "CreateProductForCategory")]
     public async Task<IActionResult> CreateProductForCategory(Guid categoryId, ProductForCreationDto product)
     {
@@ -96,6 +99,7 @@ public class ProductsController : ControllerBase
         return CreatedAtRoute("GetProductForCategory", new { categoryId, productId = productToReturn.Id }, productToReturn);
     }
 
+    [Authorize(Roles = UserRoles.Admin)]
     [HttpPut("{productId}")]
     public async Task<IActionResult> UpdateProductForCategory(Guid categoryId, Guid productId, ProductForUpdateDto product)
     {
@@ -128,6 +132,7 @@ public class ProductsController : ControllerBase
         return NoContent();
     }
 
+    [Authorize(Roles = UserRoles.Admin)]
     [HttpPatch("{productId}")]
     public async Task<IActionResult> PartiallyUpdateProductForCategory(
         Guid categoryId,
@@ -180,6 +185,7 @@ public class ProductsController : ControllerBase
         return NoContent();
     }
 
+    [Authorize(Roles = UserRoles.Admin)]
     [HttpDelete("{productId}")]
     public async Task<IActionResult> DeleteProductForCategory(Guid categoryId, Guid productId)
     {

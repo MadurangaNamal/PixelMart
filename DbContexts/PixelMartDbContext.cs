@@ -1,9 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using PixelMart.API.Entities;
 
 namespace PixelMart.API.DbContexts;
 
-public class PixelMartDbContext : DbContext
+public class PixelMartDbContext : IdentityDbContext<ApplicationUser>
 {
     public PixelMartDbContext(DbContextOptions<PixelMartDbContext> options)
         : base(options)
@@ -17,6 +18,8 @@ public class PixelMartDbContext : DbContext
     public DbSet<Order> Orders { get; set; }
     public DbSet<OrderItem> OrderItems { get; set; }
     public DbSet<Stock> Stocks { get; set; }
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PixelMart.API.Entities;
 using PixelMart.API.Models;
+using PixelMart.API.Models.Identity;
 using PixelMart.API.Services;
 
 namespace PixelMart.API.Controllers;
@@ -44,8 +46,9 @@ public class CategoriesController : ControllerBase
         return Ok(_mapper.Map<CategoryDto>(categoryFromRepo));
     }
 
+    [Authorize(Roles = UserRoles.Admin)]
     [HttpPost(Name = "CreateNewCategory")]
-    public async Task<IActionResult> CreateProductForCategory(CategoryForCreationDto category)
+    public async Task<IActionResult> CreateCategory(CategoryForCreationDto category)
     {
         var categoryDto = _mapper.Map<Category>(category);
 
@@ -58,6 +61,7 @@ public class CategoriesController : ControllerBase
 
     }
 
+    [Authorize(Roles = UserRoles.Admin)]
     [HttpPut("{categoryId}")]
     public async Task<IActionResult> UpdateCategory(Guid categoryId, CategoryForUpdateDto category)
     {
@@ -77,6 +81,7 @@ public class CategoriesController : ControllerBase
         return NoContent();
     }
 
+    [Authorize(Roles = UserRoles.Admin)]
     [HttpDelete("{categoryId}")]
     public async Task<IActionResult> DeleteCategory(Guid categoryId)
     {
