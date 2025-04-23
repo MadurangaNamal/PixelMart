@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using PixelMart.API.Models.Identity;
 
-namespace PixelMart.API;
+namespace PixelMart.API.Data;
 
 public class AppDbInitializer
 {

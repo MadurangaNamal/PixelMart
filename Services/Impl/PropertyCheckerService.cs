@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace PixelMart.API.Services;
+namespace PixelMart.API.Services.Impl;
 
 public class PropertyCheckerService : IPropertyCheckerService
 {

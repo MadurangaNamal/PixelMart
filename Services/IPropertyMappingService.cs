@@ -1,4 +1,6 @@
-﻿namespace PixelMart.API.Services;
+﻿using PixelMart.API.Helpers;
+
+namespace PixelMart.API.Services;
 
 public interface IPropertyMappingService
 {

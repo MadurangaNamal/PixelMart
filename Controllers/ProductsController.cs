@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Options;
 using PixelMart.API.Models;
 using PixelMart.API.Models.Identity;
+using PixelMart.API.Repositories;
 using PixelMart.API.ResourceParameters;
 using PixelMart.API.Services;
 

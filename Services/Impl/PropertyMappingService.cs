@@ -1,7 +1,8 @@
 ﻿using PixelMart.API.Entities;
+using PixelMart.API.Helpers;
 using PixelMart.API.Models;
 
-namespace PixelMart.API.Services;
+namespace PixelMart.API.Services.Impl;
 
 public class PropertyMappingService : IPropertyMappingService
 {

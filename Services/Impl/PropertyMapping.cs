@@ -1,4 +1,6 @@
-﻿namespace PixelMart.API.Services;
+﻿using PixelMart.API.Helpers;
+
+namespace PixelMart.API.Services.Impl;
 
 public class PropertyMapping<TSource, TDestination> : IPropertyMapping
 {

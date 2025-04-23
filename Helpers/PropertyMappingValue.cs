@@ -1,4 +1,4 @@
-﻿namespace PixelMart.API.Services;
+﻿namespace PixelMart.API.Helpers;
 
 public class PropertyMappingValue
 {
