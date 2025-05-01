@@ -13,6 +13,7 @@ using PixelMart.API.Services;
 
 namespace PixelMart.API.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/categories/{categoryId}/products")]
 public class ProductsController : ControllerBase
@@ -80,7 +81,7 @@ public class ProductsController : ControllerBase
         return Ok(_mapper.Map<ProductDto>(productFromRepo));
     }
 
-    [Authorize(Roles = UserRoles.Admin)]
+    [Authorize(Roles = $"{UserRoles.Admin}, {UserRoles.User}")]
     [HttpPost(Name = "CreateProductForCategory")]
     public async Task<IActionResult> CreateProductForCategory(Guid categoryId, ProductForCreationDto product)
     {
@@ -133,7 +134,7 @@ public class ProductsController : ControllerBase
         return NoContent();
     }
 
-    [Authorize(Roles = UserRoles.Admin)]
+    [Authorize(Roles = $"{UserRoles.Admin}, {UserRoles.User}")]
     [HttpPatch("{productId}")]
     public async Task<IActionResult> PartiallyUpdateProductForCategory(
         Guid categoryId,

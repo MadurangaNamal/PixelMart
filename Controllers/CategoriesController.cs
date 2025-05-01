@@ -8,6 +8,7 @@ using PixelMart.API.Repositories;
 
 namespace PixelMart.API.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/categories")]
 public class CategoriesController : ControllerBase
@@ -46,7 +47,7 @@ public class CategoriesController : ControllerBase
         return Ok(_mapper.Map<CategoryDto>(categoryFromRepo));
     }
 
-    [Authorize(Roles = UserRoles.Admin)]
+    [Authorize(Roles = $"{UserRoles.Admin}, {UserRoles.User}")]
     [HttpPost(Name = "CreateNewCategory")]
     public async Task<IActionResult> CreateCategory(CategoryForCreationDto category)
     {

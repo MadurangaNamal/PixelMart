@@ -72,6 +72,9 @@ public class AuthenticationController : ControllerBase
                 case UserRoles.User:
                     await _userManager.AddToRoleAsync(newUser, UserRoles.User);
                     break;
+                case UserRoles.Client:
+                    await _userManager.AddToRoleAsync(newUser, UserRoles.Client);
+                    break;
                 default:
                     break;
             }

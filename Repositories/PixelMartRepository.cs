@@ -150,7 +150,8 @@ public class PixelMartRepository : IPixelMartRepository
 
     public async Task<IEnumerable<Category>> GetCategoriesAsync()
     {
-        return await _context.Categories.Include(c => c.Products).ToListAsync();
+        //return await _context.Categories.Include(c => c.Products).ToListAsync();
+        return await _context.Categories.ToListAsync();
     }
 
     public async Task<Category> GetCategoryAsync(Guid categoryId)
