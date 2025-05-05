@@ -13,6 +13,7 @@ public interface IPixelMartRepository
     void UpdateProduct(Product product);
     void DeleteProduct(Product product);
     Task<PagedList<Product>> GetProductsAsync(Guid categoryId, ProductsResourceParameters productsResourceParameters);
+    Task<bool> ProductExistsAsync(Guid productId);
 
     #endregion
 
@@ -23,6 +24,15 @@ public interface IPixelMartRepository
     void DeleteCategory(Category category);
     void UpdateCategory(Category category);
     Task<bool> CategoryExistsAsync(Guid categoryId);
+
+    #endregion
+
+    #region Stock
+    Task<IEnumerable<Stock>> GetAllItemStocksAsync();
+    Task<Stock> GetItemStockAsync(Guid productId);
+    void AddItemStock(Guid productId, Stock stock);
+    void UpdateItemStock(Guid productId, Stock itemStock);
+    Task<bool> StockExistsAsync(Guid productId);
 
     #endregion
 

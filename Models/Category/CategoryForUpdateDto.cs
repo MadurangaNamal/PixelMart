@@ -1,4 +1,4 @@
-﻿namespace PixelMart.API.Models;
+﻿namespace PixelMart.API.Models.Category;
 
 public class CategoryForUpdateDto
 {

@@ -2,7 +2,7 @@
 using PixelMart.API.DbContexts;
 using PixelMart.API.Entities;
 using PixelMart.API.Helpers;
-using PixelMart.API.Models;
+using PixelMart.API.Models.Product;
 using PixelMart.API.ResourceParameters;
 using PixelMart.API.Services;
 
@@ -36,6 +36,7 @@ public class PixelMartRepository : IPixelMartRepository
 #pragma warning disable CS8603 // Possible null reference return.
         return await _context.Products
             .Where(p => p.Id == productId && p.CategoryId == categoryId)
+            .AsNoTracking()
             .FirstOrDefaultAsync();
 #pragma warning restore CS8603 // Possible null reference return.
 
@@ -51,6 +52,7 @@ public class PixelMartRepository : IPixelMartRepository
         return await _context.Products
             .Where(p => p.CategoryId == categoryId)
             .OrderBy(p => p.Name)
+            .AsNoTracking()
             .ToListAsync();
     }
 
@@ -76,7 +78,6 @@ public class PixelMartRepository : IPixelMartRepository
     public void DeleteProduct(Product product)
     {
         ArgumentNullException.ThrowIfNull(product);
-
         _context.Products.Remove(product);
     }
 
@@ -113,6 +114,16 @@ public class PixelMartRepository : IPixelMartRepository
              productsResourceParameters.PageSize);
     }
 
+    public async Task<bool> ProductExistsAsync(Guid productId)
+    {
+        if (productId == Guid.Empty)
+        {
+            throw new ArgumentException("Product ID cannot be empty.", nameof(productId));
+        }
+
+        return await _context.Products.AsNoTracking().AnyAsync(p => p.Id == productId);
+    }
+
     #endregion
 
     #region Category
@@ -139,7 +150,7 @@ public class PixelMartRepository : IPixelMartRepository
             throw new ArgumentException("Category ID cannot be empty.", nameof(categoryId));
         }
 
-        return await _context.Categories.AnyAsync(c => c.Id == categoryId);
+        return await _context.Categories.AsNoTracking().AnyAsync(c => c.Id == categoryId);
     }
 
     public void DeleteCategory(Category category)
@@ -150,8 +161,8 @@ public class PixelMartRepository : IPixelMartRepository
 
     public async Task<IEnumerable<Category>> GetCategoriesAsync()
     {
-        //return await _context.Categories.Include(c => c.Products).ToListAsync();
-        return await _context.Categories.ToListAsync();
+        //return await _context.Categories.Include(c => c.Products).ToListAsync(); //include product details if need
+        return await _context.Categories.AsNoTracking().ToListAsync();
     }
 
     public async Task<Category> GetCategoryAsync(Guid categoryId)
@@ -175,6 +186,58 @@ public class PixelMartRepository : IPixelMartRepository
 
     #endregion
 
+    #region Stock
+    public async Task<IEnumerable<Stock>> GetAllItemStocksAsync()
+    {
+        return await _context.Stocks.AsNoTracking().ToListAsync();
+    }
+
+    public async Task<Stock> GetItemStockAsync(Guid productId)
+    {
+        if (productId == Guid.Empty)
+        {
+            throw new ArgumentException("Product ID cannot be empty.", nameof(productId));
+        }
+
+        return await _context.Stocks.AsNoTracking().FirstAsync(s => s.ProductId == productId);
+    }
+
+    public void AddItemStock(Guid productId, Stock stock)
+    {
+        if (productId == Guid.Empty)
+        {
+            throw new ArgumentException("Product ID cannot be empty.", nameof(productId));
+        }
+
+        ArgumentNullException.ThrowIfNull(stock);
+        stock.ProductId = productId;
+        _context.Stocks.Add(stock);
+    }
+
+    public void UpdateItemStock(Guid productId, Stock itemStock)
+    {
+        if (productId == Guid.Empty)
+        {
+            throw new ArgumentException("Product ID cannot be empty.", nameof(productId));
+        }
+
+        ArgumentNullException.ThrowIfNull(itemStock);
+        itemStock.ProductId = productId;
+        _context.Stocks.Update(itemStock);
+    }
+
+    public async Task<bool> StockExistsAsync(Guid productId)
+    {
+        if (productId == Guid.Empty)
+        {
+            throw new ArgumentException("Product ID cannot be empty.", nameof(productId));
+        }
+
+        return await _context.Stocks.AsNoTracking().AnyAsync(c => c.Id == productId);
+    }
+
+    #endregion
+
     #region Common
     public async Task<bool> SaveAsync()
     {
@@ -182,5 +245,4 @@ public class PixelMartRepository : IPixelMartRepository
     }
 
     #endregion
-
 }

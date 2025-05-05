@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PixelMart.API.Entities;
-using PixelMart.API.Models;
+using PixelMart.API.Models.Category;
 using PixelMart.API.Models.Identity;
 using PixelMart.API.Repositories;
 

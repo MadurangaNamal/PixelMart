@@ -1,4 +1,6 @@
-﻿namespace PixelMart.API.Models;
+﻿using PixelMart.API.Models.Product;
+
+namespace PixelMart.API.Models.Category;
 
 public class CategoryForCreationDto
 {

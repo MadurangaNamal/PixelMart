@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace PixelMart.API.Models;
+namespace PixelMart.API.Models.Product;
 
 public abstract class ProductForManipulationDto
 {

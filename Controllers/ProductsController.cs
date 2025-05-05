@@ -5,8 +5,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Options;
-using PixelMart.API.Models;
+using PixelMart.API.Entities;
 using PixelMart.API.Models.Identity;
+using PixelMart.API.Models.Product;
 using PixelMart.API.Repositories;
 using PixelMart.API.ResourceParameters;
 using PixelMart.API.Services;
@@ -91,9 +92,7 @@ public class ProductsController : ControllerBase
         }
 
         var productEntity = _mapper.Map<Entities.Product>(product);
-
         _pixelMartRepository.AddProduct(categoryId, productEntity);
-
         await _pixelMartRepository.SaveAsync();
 
         var productToReturn = _mapper.Map<ProductDto>(productEntity);
@@ -114,9 +113,8 @@ public class ProductsController : ControllerBase
 
         if (productFromRepo == null)
         {
-            var productToAdd = _mapper.Map<Entities.Product>(product);
+            var productToAdd = _mapper.Map<Product>(product);
             productToAdd.Id = productId;
-
             _pixelMartRepository.AddProduct(categoryId, productToAdd);
             await _pixelMartRepository.SaveAsync();
 
@@ -126,9 +124,7 @@ public class ProductsController : ControllerBase
         }
 
         _mapper.Map(product, productFromRepo); // apply the updated field values to the entity
-
         _pixelMartRepository.UpdateProduct(productFromRepo);
-
         await _pixelMartRepository.SaveAsync();
 
         return NoContent();

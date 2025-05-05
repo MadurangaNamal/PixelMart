@@ -1,6 +1,6 @@
 ﻿using PixelMart.API.Entities;
 using PixelMart.API.Helpers;
-using PixelMart.API.Models;
+using PixelMart.API.Models.Product;
 
 namespace PixelMart.API.Services.Impl;
 
