@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using PixelMart.API.Data;
 using PixelMart.API.DbContexts;
 using PixelMart.API.Entities;
+using PixelMart.API.Helpers;
 using PixelMart.API.Repositories;
 using PixelMart.API.Services;
 using PixelMart.API.Services.Impl;
@@ -19,8 +20,11 @@ internal static class StartupHelperExtensions
         var connectionString = builder.Configuration.GetConnectionString("PixelMartDbContextConnection")
             ?? throw new InvalidOperationException("Connection string 'PixelMartDbContextConnection' not found.");
 
-        builder.Services.AddDbContext<PixelMartDbContext>(options =>
-            options.UseSqlServer(connectionString));
+        builder.Logging.ClearProviders();
+        builder.Logging.AddConsole();
+        builder.Services.AddHttpContextAccessor();
+        builder.Services.AddScoped<RequestLogHelper>();
+        builder.Services.AddDbContext<PixelMartDbContext>(options => options.UseSqlServer(connectionString));
 
         var tokenValidationParameters = new TokenValidationParameters()
         {
@@ -104,8 +108,6 @@ internal static class StartupHelperExtensions
             configure.ReturnHttpNotAcceptable = true;
         }).AddNewtonsoftJson()
         .AddXmlDataContractSerializerFormatters();
-
-
 
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
