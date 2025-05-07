@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PixelMart.API.DbContexts;
 
@@ -11,9 +12,11 @@ using PixelMart.API.DbContexts;
 namespace PixelMart.API.Migrations
 {
     [DbContext(typeof(PixelMartDbContext))]
-    partial class PixelMartDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250507091425_product_schema_update")]
+    partial class product_schema_update
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

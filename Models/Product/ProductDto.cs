@@ -8,5 +8,7 @@ public class ProductDto
 
     public string FullName { get; set; } = string.Empty;
 
+    public decimal Price { get; set; } = 0.00m;
+
     public string? Description { get; set; }
 }

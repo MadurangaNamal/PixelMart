@@ -11,6 +11,8 @@ public abstract class ProductForManipulationDto
     [MaxLength(250, ErrorMessage = "The brand shouldn't have more than 250 characters.")]
     public virtual string Brand { get; set; } = string.Empty;
 
+    public virtual decimal Price { get; set; } = 0.00m;
+
     [MaxLength(1500, ErrorMessage = "The description shouldn't have more than 1500 characters.")]
     public virtual string Description { get; set; } = string.Empty;
 }
