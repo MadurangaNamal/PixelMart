@@ -1,0 +1,619 @@
+{
+	"info": {
+		"_postman_id": "5a5a152f-654c-419a-9bae-03078c7ce477",
+		"name": "PixelMart-Restful-API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "8474573"
+	},
+	"item": [
+		{
+			"name": "Categories",
+			"item": [
+				{
+					"name": "All Categories",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{appBaseUrl}}/api/categories",
+							"host": [
+								"{{appBaseUrl}}"
+							],
+							"path": [
+								"api",
+								"categories"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add Category",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Medicine\",\r\n  \"products\": []\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{appBaseUrl}}/api/categories",
+							"host": [
+								"{{appBaseUrl}}"
+							],
+							"path": [
+								"api",
+								"categories"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get a Category",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{appBaseUrl}}/api/categories/2a969732-97e5-4603-8144-d3d0a8638f60",
+							"host": [
+								"{{appBaseUrl}}"
+							],
+							"path": [
+								"api",
+								"categories",
+								"2a969732-97e5-4603-8144-d3d0a8638f60"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update a Category",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Medicine\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{appBaseUrl}}/api/categories/58a5ec0b-5ee7-4ecd-bf06-a244a8804eb4",
+							"host": [
+								"{{appBaseUrl}}"
+							],
+							"path": [
+								"api",
+								"categories",
+								"58a5ec0b-5ee7-4ecd-bf06-a244a8804eb4"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete a Category",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{appBaseUrl}}/api/categories/58a5ec0b-5ee7-4ecd-bf06-a244a8804eb4",
+							"host": [
+								"{{appBaseUrl}}"
+							],
+							"path": [
+								"api",
+								"categories",
+								"58a5ec0b-5ee7-4ecd-bf06-a244a8804eb4"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "User-Identity",
+			"item": [
+				{
+					"name": "Register New User",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"firstName\": \"Maduranga\",\r\n  \"lastName\": \"Wimalarathne\",\r\n  \"emailAddress\": \"madhuranganw@gmail.com\",\r\n  \"userName\": \"maduranga\",\r\n  \"password\": \"Maduranga@123\",\r\n  \"role\": \"Admin\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{appBaseUrl}}/api/auth/register",
+							"host": [
+								"{{appBaseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "User Login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"emailAddress\": \"madhuranganw@gmail.com\",\r\n  \"password\": \"Maduranga@123\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{appBaseUrl}}/api/auth/login",
+							"host": [
+								"{{appBaseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh Token",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoibWFkdXJhbmdhIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvbmFtZWlkZW50aWZpZXIiOiIyMTIwMTY5ZC1hMGUzLTQwMTMtYjZjNy1jZDE3NGI2MjNlM2YiLCJlbWFpbCI6Im1hZGh1cmFuZ2Fud0BnbWFpbC5jb20iLCJzdWIiOiJtYWRodXJhbmdhbndAZ21haWwuY29tIiwianRpIjoiMjNhNDViODQtNzUyMC00NzRkLTg3YzQtZDkxODUzNTQ2YTU0IiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiQWRtaW4iLCJleHAiOjE3NDYwOTkyOTcsImlzcyI6Imh0dHBzOi8vbG9jYWxob3N0OjQxMjUxLyIsImF1ZCI6InVzZXIifQ.aq1WCCFHVPTCKPktdIzQjGLz9mIwan9wibxqd7mS8fU\",\r\n  \"refreshToken\": \"5e88a05d-6b92-47d9-b4f0-816200145144-abe611ca-10f1-4ea2-80bf-f768f6411f5a\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{appBaseUrl}}/api/auth/refresh-token",
+							"host": [
+								"{{appBaseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"refresh-token"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Products",
+			"item": [
+				{
+					"name": "Get Products for Category",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{appBaseUrl}}/api/categories/7bdb7611-2f7c-4487-80ae-79de5f9bf2ee/products",
+							"host": [
+								"{{appBaseUrl}}"
+							],
+							"path": [
+								"api",
+								"categories",
+								"7bdb7611-2f7c-4487-80ae-79de5f9bf2ee",
+								"products"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add a new Product",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Yellow Banana\",\r\n  \"brand\": \"Unbranded\",\r\n  \"description\": \"Sri Lankan yellow banana\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{appBaseUrl}}/api/categories/7bdb7611-2f7c-4487-80ae-79de5f9bf2ee/products",
+							"host": [
+								"{{appBaseUrl}}"
+							],
+							"path": [
+								"api",
+								"categories",
+								"7bdb7611-2f7c-4487-80ae-79de5f9bf2ee",
+								"products"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Product",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{appBaseUrl}}/api/categories/7bdb7611-2f7c-4487-80ae-79de5f9bf2ee/products/8885E0D9-DEEF-4BD1-91A3-08DD74577FAD",
+							"host": [
+								"{{appBaseUrl}}"
+							],
+							"path": [
+								"api",
+								"categories",
+								"7bdb7611-2f7c-4487-80ae-79de5f9bf2ee",
+								"products",
+								"8885E0D9-DEEF-4BD1-91A3-08DD74577FAD"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Product",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"string\",\r\n  \"price\": 0,\r\n  \"brand\": \"string\",\r\n  \"description\": \"string\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{appBaseUrl}}/api/categories/7bdb7611-2f7c-4487-80ae-79de5f9bf2ee/products/8885E0D9-DEEF-4BD1-91A3-08DD74577FAD",
+							"host": [
+								"{{appBaseUrl}}"
+							],
+							"path": [
+								"api",
+								"categories",
+								"7bdb7611-2f7c-4487-80ae-79de5f9bf2ee",
+								"products",
+								"8885E0D9-DEEF-4BD1-91A3-08DD74577FAD"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Product(Partial)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "[\r\n  {\r\n   \"op\": \"replace\",\r\n    \"path\": \"/price\",\r\n    \"value\": 4.99\r\n  }\r\n]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{appBaseUrl}}/api/categories/7bdb7611-2f7c-4487-80ae-79de5f9bf2ee/products/d6c8643d-f3fb-495c-f5df-08dd8d44db3c",
+							"host": [
+								"{{appBaseUrl}}"
+							],
+							"path": [
+								"api",
+								"categories",
+								"7bdb7611-2f7c-4487-80ae-79de5f9bf2ee",
+								"products",
+								"d6c8643d-f3fb-495c-f5df-08dd8d44db3c"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Product",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{appBaseUrl}}/api/categories/7bdb7611-2f7c-4487-80ae-79de5f9bf2ee/products/8885E0D9-DEEF-4BD1-91A3-08DD74577FAD",
+							"host": [
+								"{{appBaseUrl}}"
+							],
+							"path": [
+								"api",
+								"categories",
+								"7bdb7611-2f7c-4487-80ae-79de5f9bf2ee",
+								"products",
+								"8885E0D9-DEEF-4BD1-91A3-08DD74577FAD"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Stocks",
+			"item": [
+				{
+					"name": "Get All Stocks",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{appBaseUrl}}/api/item-stocks",
+							"host": [
+								"{{appBaseUrl}}"
+							],
+							"path": [
+								"api",
+								"item-stocks"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Product Stock",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{appBaseUrl}}/api/item-stocks/8885E0D9-DEEF-4BD1-91A3-08DD74577FAD",
+							"host": [
+								"{{appBaseUrl}}"
+							],
+							"path": [
+								"api",
+								"item-stocks",
+								"8885E0D9-DEEF-4BD1-91A3-08DD74577FAD"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add Item Stock",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"quantity\": 50,\r\n  \"threshold\": 10\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{appBaseUrl}}/api/item-stocks/8885E0D9-DEEF-4BD1-91A3-08DD74577FAD",
+							"host": [
+								"{{appBaseUrl}}"
+							],
+							"path": [
+								"api",
+								"item-stocks",
+								"8885E0D9-DEEF-4BD1-91A3-08DD74577FAD"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Item Stock",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"quantity\": 40,\r\n  \"threshold\": 10\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{appBaseUrl}}/api/item-stocks/8885E0D9-DEEF-4BD1-91A3-08DD74577FAD",
+							"host": [
+								"{{appBaseUrl}}"
+							],
+							"path": [
+								"api",
+								"item-stocks",
+								"8885E0D9-DEEF-4BD1-91A3-08DD74577FAD"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

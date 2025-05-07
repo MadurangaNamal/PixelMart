@@ -38,7 +38,7 @@ public class StocksController : ControllerBase
             return NotFound();
         }
 
-        var productStocksFromRepo = _pixelMartRepository.GetItemStockAsync(productId);
+        var productStocksFromRepo = await _pixelMartRepository.GetItemStockAsync(productId);
         return Ok(_mapper.Map<StockItemDto>(productStocksFromRepo));
     }
 

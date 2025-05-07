@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using PixelMart.API.Data;
 using PixelMart.API.DbContexts;
 using PixelMart.API.Entities;
@@ -110,7 +111,40 @@ internal static class StartupHelperExtensions
         .AddXmlDataContractSerializerFormatters();
 
         builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
+
+        builder.Services.AddSwaggerGen(c =>
+        {
+            c.SwaggerDoc("v1", new OpenApiInfo { Title = "PixelMart.API", Version = "v1" });
+
+            // 1. Define the Security Scheme
+            var jwtSecurityScheme = new OpenApiSecurityScheme
+            {
+                Scheme = "bearer",
+                BearerFormat = "JWT",
+                Name = "Authorization",
+                In = ParameterLocation.Header,
+                Type = SecuritySchemeType.Http,
+                Description = "Enter JWT like this: Bearer {header}.{payload}.{signature}",
+
+                Reference = new OpenApiReference
+                {
+                    Id = "Bearer",
+                    Type = ReferenceType.SecurityScheme
+                }
+            };
+
+            c.AddSecurityDefinition("Bearer", jwtSecurityScheme);
+
+            c.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
+                {
+                    jwtSecurityScheme,
+                    Array.Empty<string>()
+                }
+            });
+        });
+
+
         builder.Services.AddAutoMapper(typeof(Program));
 
         return builder.Build();

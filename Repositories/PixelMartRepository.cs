@@ -233,7 +233,7 @@ public class PixelMartRepository : IPixelMartRepository
             throw new ArgumentException("Product ID cannot be empty.", nameof(productId));
         }
 
-        return await _context.Stocks.AsNoTracking().AnyAsync(c => c.Id == productId);
+        return await _context.Stocks.AsNoTracking().AnyAsync(s => s.ProductId == productId);
     }
 
     #endregion
