@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using PixelMart.API.DbContexts;
 using PixelMart.API.Entities;
+using PixelMart.API.Helpers;
 using PixelMart.API.Models.Identity;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -21,23 +22,28 @@ public class AuthenticationController : ControllerBase
     private readonly PixelMartDbContext _context;
     private readonly IConfiguration _configuration;
     private readonly TokenValidationParameters _tokenValidationParameters;
+    private readonly RequestLogHelper _requestLogHelper;
 
     public AuthenticationController(UserManager<ApplicationUser> userManager,
            RoleManager<IdentityRole> roleManager,
            PixelMartDbContext context,
            IConfiguration configuration,
-           TokenValidationParameters tokenValidationParameters)
+           TokenValidationParameters tokenValidationParameters,
+           RequestLogHelper requestLogHelper)
     {
         _userManager = userManager;
         _roleManager = roleManager;
         _context = context;
         _configuration = configuration;
         _tokenValidationParameters = tokenValidationParameters;
+        _requestLogHelper = requestLogHelper;
     }
 
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
     {
+        _requestLogHelper.LogInfo("POST /api/auth/register CALLED TO REGISTER NEW USER");
+
         if (!ModelState.IsValid)
         {
             return BadRequest("Please, provide all the required fields");
@@ -79,8 +85,12 @@ public class AuthenticationController : ControllerBase
                     break;
             }
 
+            _requestLogHelper.LogInfo($"NEW {registerDto.Role} USER CREATED SUCCESSFULLY");
+
             return Ok("User created");
         }
+
+        _requestLogHelper.LogError(null, "USER CREATION FAILED");
 
         return BadRequest("User could not be created");
     }
@@ -88,6 +98,8 @@ public class AuthenticationController : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
     {
+        _requestLogHelper.LogInfo("POST /api/auth/login CALLED TO LOGIN USER");
+
         if (!ModelState.IsValid)
         {
             return BadRequest("Please, provide all required fields");
@@ -99,12 +111,17 @@ public class AuthenticationController : ControllerBase
             var tokenValue = await GenerateJWTTokenAsync(userExists, null);
             return Ok(tokenValue);
         }
+
+        _requestLogHelper.LogError(null, "UNAUTHORIZED LOGIN ATTEMPT");
+
         return Unauthorized();
     }
 
     [HttpPost("refresh-token")]
     public async Task<IActionResult> RefreshToken([FromBody] TokenRequestDto tokenRequestDto)
     {
+        _requestLogHelper.LogInfo("POST /api/auth/refresh-token CALLED TO REFRESH TOKEN");
+
         if (!ModelState.IsValid)
         {
             return BadRequest("Please, provide all required fields");

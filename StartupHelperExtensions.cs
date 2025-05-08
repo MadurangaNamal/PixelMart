@@ -23,6 +23,7 @@ internal static class StartupHelperExtensions
 
         builder.Logging.ClearProviders();
         builder.Logging.AddConsole();
+        builder.Logging.AddDebug();
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddScoped<RequestLogHelper>();
         builder.Services.AddDbContext<PixelMartDbContext>(options => options.UseSqlServer(connectionString));

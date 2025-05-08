@@ -15,7 +15,7 @@ public class RequestLogHelper
     {
         var context = _httpContextAccessor.HttpContext;
         var username = context?.User?.Identity?.Name ?? "Anonymous";
-        var timestamp = DateTime.UtcNow;
+        var timestamp = DateTime.Now;
 
         _logger.LogInformation("[{Time}] User: {User} - {Message}", timestamp, username, message);
     }
@@ -24,7 +24,7 @@ public class RequestLogHelper
     {
         var context = _httpContextAccessor.HttpContext;
         var username = context?.User?.Identity?.Name ?? "Anonymous";
-        var timestamp = DateTime.UtcNow;
+        var timestamp = DateTime.Now;
 
         _logger.LogError(ex, "[{Time}] User: {User} - {Message}", timestamp, username, message);
     }

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Options;
 using PixelMart.API.Entities;
+using PixelMart.API.Helpers;
 using PixelMart.API.Models.Identity;
 using PixelMart.API.Models.Product;
 using PixelMart.API.Repositories;
@@ -22,14 +23,17 @@ public class ProductsController : ControllerBase
     private readonly IPixelMartRepository _pixelMartRepository;
     private readonly IMapper _mapper;
     private readonly IPropertyMappingService _propertyMappingService;
+    private readonly RequestLogHelper _requestLogHelper;
 
     public ProductsController(IPixelMartRepository pixelMartRepository,
         IMapper mapper,
-        IPropertyMappingService propertyMappingService)
+        IPropertyMappingService propertyMappingService,
+        RequestLogHelper requestLogHelper)
     {
         _pixelMartRepository = pixelMartRepository ?? throw new ArgumentNullException(nameof(pixelMartRepository));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _propertyMappingService = propertyMappingService;
+        _requestLogHelper = requestLogHelper;
     }
 
     //[HttpGet(Name = "GetProductsForCategory")]
@@ -48,6 +52,8 @@ public class ProductsController : ControllerBase
     public async Task<ActionResult<IEnumerable<ProductDto>>> GetProducts(Guid categoryId,
         [FromQuery] ProductsResourceParameters productsResourceParameters)
     {
+        _requestLogHelper.LogInfo($"GET /api/categories/{categoryId}/products CALLED TO RETRIEVE PRODUCTS FOR A CATEGORY");
+
         if (!await _pixelMartRepository.CategoryExistsAsync(categoryId))
         {
             return NotFound();
@@ -67,6 +73,8 @@ public class ProductsController : ControllerBase
     [HttpGet("{productId}", Name = "GetProductForCategory")]
     public async Task<ActionResult<ProductDto>> GetProductForCategory(Guid categoryId, Guid productId)
     {
+        _requestLogHelper.LogInfo($"GET /api/categories/{categoryId}/products/{productId} CALLED TO RETRIEVE SINGLE PRODUCT");
+
         if (!await _pixelMartRepository.CategoryExistsAsync(categoryId))
         {
             return NotFound();
@@ -86,6 +94,8 @@ public class ProductsController : ControllerBase
     [HttpPost(Name = "CreateProductForCategory")]
     public async Task<IActionResult> CreateProductForCategory(Guid categoryId, ProductForCreationDto product)
     {
+        _requestLogHelper.LogInfo($"POST /api/categories/{categoryId}/products CALLED TO ADD A NEW PRODUCT");
+
         if (!await _pixelMartRepository.CategoryExistsAsync(categoryId))
         {
             return NotFound();
@@ -104,6 +114,8 @@ public class ProductsController : ControllerBase
     [HttpPut("{productId}")]
     public async Task<IActionResult> UpdateProductForCategory(Guid categoryId, Guid productId, ProductForUpdateDto product)
     {
+        _requestLogHelper.LogInfo($"PUT /api/categories/{categoryId}/products/{productId} CALLED TO UPDATE A PRODUCT");
+
         if (!await _pixelMartRepository.CategoryExistsAsync(categoryId))
         {
             return NotFound();
@@ -137,6 +149,8 @@ public class ProductsController : ControllerBase
         Guid productId,
         JsonPatchDocument<ProductForUpdateDto> patchDocument)
     {
+        _requestLogHelper.LogInfo($"PATCH /api/categories/{categoryId}/products/{productId} CALLED TO PARTIALLY UPDATE A PRODUCT");
+
         if (!await _pixelMartRepository.CategoryExistsAsync(categoryId))
         {
             return NotFound();
@@ -187,6 +201,8 @@ public class ProductsController : ControllerBase
     [HttpDelete("{productId}")]
     public async Task<IActionResult> DeleteProductForCategory(Guid categoryId, Guid productId)
     {
+        _requestLogHelper.LogInfo($"DELETE /api/categories/{categoryId}/products/{productId} CALLED TO DELETE A PRODUCT");
+
         if (!await _pixelMartRepository.CategoryExistsAsync(categoryId))
         {
             return NotFound();
