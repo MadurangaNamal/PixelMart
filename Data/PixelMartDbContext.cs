@@ -86,23 +86,5 @@ public class PixelMartDbContext : IdentityDbContext<ApplicationUser>
             .Property(p => p.UnitPrice)
             .HasPrecision(18, 2);
 
-        //SeedData(modelBuilder);
-    }
-
-    private void SeedData(ModelBuilder modelBuilder)
-    {
-        var electronicsId = Guid.NewGuid();
-        var clothingId = Guid.NewGuid();
-        var kitchenItemsId = Guid.NewGuid();
-        var groceriesId = Guid.NewGuid();
-        var foodItemsId = Guid.NewGuid();
-
-        modelBuilder.Entity<Category>().HasData(
-            new Category("Clothing") { Id = clothingId },
-            new Category("Electronics") { Id = electronicsId },
-            new Category("Kitchen Items") { Id = kitchenItemsId },
-            new Category("Groceries") { Id = groceriesId },
-            new Category("Foods") { Id = foodItemsId }
-        );
     }
 }
