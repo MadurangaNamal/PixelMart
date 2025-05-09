@@ -36,6 +36,12 @@ public class PixelMartDbContext : IdentityDbContext<ApplicationUser>
             .HasForeignKey(ci => ci.ShoppingCartId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        modelBuilder.Entity<ShoppingCart>()
+            .HasOne(sc => sc.User)
+            .WithOne(u => u.ShoppingCart)
+            .HasForeignKey<ShoppingCart>(sc => sc.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
         modelBuilder.Entity<CartItem>()
             .HasOne(ci => ci.Product)
             .WithMany()

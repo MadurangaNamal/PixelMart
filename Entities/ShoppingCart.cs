@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PixelMart.API.Entities;
 
@@ -13,5 +14,12 @@ public class ShoppingCart
     // Navigation properties
     public ICollection<CartItem> Items { get; set; } = [];
 
-    //public string UserId { get; set; } = null!;
+    // Foreign key to ApplicationUser
+    [Required]
+    public string UserId { get; set; }
+
+    // Navigation property to ApplicationUser
+    [ForeignKey("UserId")]
+    public ApplicationUser User { get; set; }
+
 }

@@ -9,6 +9,7 @@ public class StocksProfile : Profile
     public StocksProfile()
     {
         CreateMap<StockManipulationDto, Stock>();
+
         CreateMap<Stock, StockItemDto>();
     }
 }
