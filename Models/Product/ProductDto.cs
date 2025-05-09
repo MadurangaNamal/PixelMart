@@ -11,4 +11,8 @@ public class ProductDto
     public decimal Price { get; set; } = 0.00m;
 
     public string? Description { get; set; }
+
+    public int Quantity { get; set; }
+
+    public bool IsLowStock { get; set; }
 }

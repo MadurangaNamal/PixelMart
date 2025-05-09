@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using PixelMart.API.Entities;
 using PixelMart.API.Models.Product;
 
 namespace PixelMart.API.Profiles;
@@ -7,11 +8,13 @@ public class ProductsProfile : Profile
 {
     public ProductsProfile()
     {
-        CreateMap<Entities.Product, ProductDto>()
-            .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => $"{src.Brand} {src.Name}"));
+        CreateMap<Product, ProductDto>()
+            .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => $"{src.Brand} {src.Name}"))
+            .ForMember(dest => dest.Quantity, opt => opt.MapFrom(src => src.Stock!.Quantity))
+            .ForMember(dest => dest.IsLowStock, opt => opt.MapFrom(src => src.Stock!.IsLowStock));
 
-        CreateMap<ProductForCreationDto, Entities.Product>();
+        CreateMap<ProductForCreationDto, Product>();
 
-        CreateMap<ProductForUpdateDto, Entities.Product>().ReverseMap();
+        CreateMap<ProductForUpdateDto, Product>().ReverseMap();
     }
 }

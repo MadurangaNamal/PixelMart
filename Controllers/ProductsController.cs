@@ -67,6 +67,12 @@ public class ProductsController : ControllerBase
         }
 
         var productsFromRepo = await _pixelMartRepository.GetProductsAsync(categoryId, productsResourceParameters);
+
+        foreach (Product product in productsFromRepo)
+        {
+            product.Stock = _pixelMartRepository.GetItemStockAsync(product.Id).Result;
+        }
+
         return Ok(_mapper.Map<IEnumerable<ProductDto>>(productsFromRepo));
     }
 
@@ -87,6 +93,7 @@ public class ProductsController : ControllerBase
             return NotFound();
         }
 
+        productFromRepo.Stock = _pixelMartRepository.GetItemStockAsync(productFromRepo.Id).Result;
         return Ok(_mapper.Map<ProductDto>(productFromRepo));
     }
 
