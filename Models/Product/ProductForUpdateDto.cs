@@ -11,6 +11,12 @@ public class ProductForUpdateDto : ProductForManipulationDto
         set => base.Brand = value;
     }
 
+    [Required(ErrorMessage = "You should fill out a price")]
+    public override decimal Price
+    {
+        get => base.Price;
+        set => base.Price = value;
+    }
 
     [Required(ErrorMessage = "You should fill out a description")]
     public override string Description

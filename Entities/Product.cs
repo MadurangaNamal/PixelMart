@@ -24,6 +24,9 @@ public class Product
     [MaxLength(250)]
     public string Brand { get; set; } = string.Empty;
 
+    [MaxLength(100)]
+    public string? Color { get; set; } = null;
+
     [Column(TypeName = "decimal(18,2)")]
     public decimal Price { get; set; } = 0.00m;
 
