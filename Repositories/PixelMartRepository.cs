@@ -244,6 +244,51 @@ public class PixelMartRepository : IPixelMartRepository
 
     #endregion
 
+    #region Shopping Cart
+
+    public async Task<IEnumerable<ShoppingCart>> GetAllCartDetailsAsync()
+    {
+        return await _context.ShoppingCarts.AsNoTracking().ToListAsync();
+    }
+
+    public async Task<ShoppingCart> GetCartDetailsForUserAsync(Guid userId)
+    {
+        if (userId == Guid.Empty)
+            throw new ArgumentException("User ID cannot be empty.", nameof(userId));
+
+        return await _context.ShoppingCarts.AsNoTracking().FirstAsync(sc => sc.UserId.Equals(userId.ToString()));
+    }
+
+    public async Task AddShoppingCartAsync(Guid userId, ShoppingCart shoppingCart)
+    {
+        if (userId == Guid.Empty)
+            throw new ArgumentException("User ID cannot be empty.", nameof(userId));
+
+        ArgumentNullException.ThrowIfNull(shoppingCart);
+        shoppingCart.UserId = userId.ToString();
+        await _context.ShoppingCarts.AddAsync(shoppingCart);
+    }
+
+    public async Task UpdateShoppingCartAsync(Guid userId, ShoppingCart shoppingCart)
+    {
+        if (userId == Guid.Empty)
+            throw new ArgumentException("User ID cannot be empty.", nameof(userId));
+
+        ArgumentNullException.ThrowIfNull(shoppingCart);
+        shoppingCart.UserId = userId.ToString();
+        _context.ShoppingCarts.Update(shoppingCart);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task DeleteShoppingCartAsync(ShoppingCart cart)
+    {
+        ArgumentNullException.ThrowIfNull(cart);
+        _context.ShoppingCarts.Remove(cart);
+        await _context.SaveChangesAsync();
+    }
+
+    #endregion
+
     #region Common
     public async Task<bool> SaveAsync()
     {

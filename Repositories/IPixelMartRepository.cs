@@ -37,8 +37,11 @@ public interface IPixelMartRepository
     #endregion
 
     #region Shopping Cart
-
-
+    Task<IEnumerable<ShoppingCart>> GetAllCartDetailsAsync();
+    Task<ShoppingCart> GetCartDetailsForUserAsync(Guid userId);
+    Task AddShoppingCartAsync(Guid userId, ShoppingCart shoppingCart);
+    Task UpdateShoppingCartAsync(Guid userId, ShoppingCart shoppingCart);
+    Task DeleteShoppingCartAsync(ShoppingCart cart);
     #endregion
 
     #region Common
