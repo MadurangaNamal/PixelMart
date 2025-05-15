@@ -56,7 +56,7 @@ public class PixelMartRepository : IPixelMartRepository
             .ToListAsync();
     }
 
-    public void AddProduct(Guid categoryId, Product product)
+    public async Task AddProductAsync(Guid categoryId, Product product)
     {
         if (categoryId == Guid.Empty)
         {
@@ -66,19 +66,21 @@ public class PixelMartRepository : IPixelMartRepository
         ArgumentNullException.ThrowIfNull(product);
 
         product.CategoryId = categoryId;
-        _context.Products.Add(product);
+        await _context.Products.AddAsync(product);
     }
 
-    public void UpdateProduct(Product product)
+    public async Task UpdateProductAsync(Product product)
     {
         ArgumentNullException.ThrowIfNull(product);
         _context.Products.Update(product);
+        await _context.SaveChangesAsync();
     }
 
-    public void DeleteProduct(Product product)
+    public async Task DeleteProductAsync(Product product)
     {
         ArgumentNullException.ThrowIfNull(product);
         _context.Products.Remove(product);
+        await _context.SaveChangesAsync();
     }
 
     public async Task<PagedList<Product>> GetProductsAsync(
@@ -127,7 +129,7 @@ public class PixelMartRepository : IPixelMartRepository
     #endregion
 
     #region Category
-    public void AddCategory(Category category)
+    public async Task AddCategoryAsync(Category category)
     {
         ArgumentNullException.ThrowIfNull(category);
         category.Id = Guid.NewGuid();
@@ -140,7 +142,7 @@ public class PixelMartRepository : IPixelMartRepository
             }
         }
 
-        _context.Categories.Add(category);
+        await _context.Categories.AddAsync(category);
     }
 
     public async Task<bool> CategoryExistsAsync(Guid categoryId)
@@ -153,10 +155,11 @@ public class PixelMartRepository : IPixelMartRepository
         return await _context.Categories.AsNoTracking().AnyAsync(c => c.Id == categoryId);
     }
 
-    public void DeleteCategory(Category category)
+    public async Task DeleteCategoryAsync(Category category)
     {
         ArgumentNullException.ThrowIfNull(category);
         _context.Categories.Remove(category);
+        await _context.SaveChangesAsync();
     }
 
     public async Task<IEnumerable<Category>> GetCategoriesAsync()
@@ -178,10 +181,11 @@ public class PixelMartRepository : IPixelMartRepository
 
     }
 
-    public void UpdateCategory(Category category)
+    public async Task UpdateCategoryAsync(Category category)
     {
         ArgumentNullException.ThrowIfNull(category);
         _context.Categories.Update(category);
+        await _context.SaveChangesAsync();
     }
 
     #endregion
@@ -202,7 +206,7 @@ public class PixelMartRepository : IPixelMartRepository
         return await _context.Stocks.AsNoTracking().FirstAsync(s => s.ProductId == productId);
     }
 
-    public void AddItemStock(Guid productId, Stock stock)
+    public async Task AddItemStockAsync(Guid productId, Stock stock)
     {
         if (productId == Guid.Empty)
         {
@@ -211,10 +215,10 @@ public class PixelMartRepository : IPixelMartRepository
 
         ArgumentNullException.ThrowIfNull(stock);
         stock.ProductId = productId;
-        _context.Stocks.Add(stock);
+        await _context.Stocks.AddAsync(stock);
     }
 
-    public void UpdateItemStock(Guid productId, Stock itemStock)
+    public async Task UpdateItemStockAsync(Guid productId, Stock itemStock)
     {
         if (productId == Guid.Empty)
         {
@@ -224,6 +228,8 @@ public class PixelMartRepository : IPixelMartRepository
         ArgumentNullException.ThrowIfNull(itemStock);
         itemStock.ProductId = productId;
         _context.Stocks.Update(itemStock);
+
+        await _context.SaveChangesAsync();
     }
 
     public async Task<bool> StockExistsAsync(Guid productId)

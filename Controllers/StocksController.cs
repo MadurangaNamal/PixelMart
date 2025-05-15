@@ -62,7 +62,7 @@ public class StocksController : ControllerBase
         }
 
         var stockEntity = _mapper.Map<Stock>(productStock);
-        _pixelMartRepository.AddItemStock(productId, stockEntity);
+        await _pixelMartRepository.AddItemStockAsync(productId, stockEntity);
         await _pixelMartRepository.SaveAsync();
 
         var productStockToReturn = _mapper.Map<StockItemDto>(stockEntity);
@@ -86,7 +86,7 @@ public class StocksController : ControllerBase
         if (productStockFromRepo is null)
         {
             var stockToAdd = _mapper.Map<Stock>(productStock);
-            _pixelMartRepository.AddItemStock(productId, stockToAdd);
+            await _pixelMartRepository.AddItemStockAsync(productId, stockToAdd);
             await _pixelMartRepository.SaveAsync();
 
             var stockItemToReturn = _mapper.Map<StockItemDto>(stockToAdd);
@@ -94,8 +94,7 @@ public class StocksController : ControllerBase
         }
 
         _mapper.Map(productStock, productStockFromRepo);
-        _pixelMartRepository.UpdateItemStock(productId, productStockFromRepo);
-        await _pixelMartRepository.SaveAsync();
+        await _pixelMartRepository.UpdateItemStockAsync(productId, productStockFromRepo);
 
         return NoContent();
     }

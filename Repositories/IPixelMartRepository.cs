@@ -9,9 +9,9 @@ public interface IPixelMartRepository
     #region Product
     Task<IEnumerable<Product>> GetProductsAsync(Guid categoryId);
     Task<Product> GetproductAsync(Guid categoryId, Guid productId);
-    void AddProduct(Guid categoryId, Product product);
-    void UpdateProduct(Product product);
-    void DeleteProduct(Product product);
+    Task AddProductAsync(Guid categoryId, Product product);
+    Task UpdateProductAsync(Product product);
+    Task DeleteProductAsync(Product product);
     Task<PagedList<Product>> GetProductsAsync(Guid categoryId, ProductsResourceParameters productsResourceParameters);
     Task<bool> ProductExistsAsync(Guid productId);
 
@@ -20,9 +20,9 @@ public interface IPixelMartRepository
     #region Category
     Task<IEnumerable<Category>> GetCategoriesAsync();
     Task<Category> GetCategoryAsync(Guid categoryId);
-    void AddCategory(Category category);
-    void DeleteCategory(Category category);
-    void UpdateCategory(Category category);
+    Task AddCategoryAsync(Category category);
+    Task DeleteCategoryAsync(Category category);
+    Task UpdateCategoryAsync(Category category);
     Task<bool> CategoryExistsAsync(Guid categoryId);
 
     #endregion
@@ -30,9 +30,14 @@ public interface IPixelMartRepository
     #region Stock
     Task<IEnumerable<Stock>> GetAllItemStocksAsync();
     Task<Stock> GetItemStockAsync(Guid productId);
-    void AddItemStock(Guid productId, Stock stock);
-    void UpdateItemStock(Guid productId, Stock itemStock);
+    Task AddItemStockAsync(Guid productId, Stock stock);
+    Task UpdateItemStockAsync(Guid productId, Stock itemStock);
     Task<bool> StockExistsAsync(Guid productId);
+
+    #endregion
+
+    #region Shopping Cart
+
 
     #endregion
 

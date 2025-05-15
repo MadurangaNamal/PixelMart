@@ -109,7 +109,7 @@ public class ProductsController : ControllerBase
         }
 
         var productEntity = _mapper.Map<Entities.Product>(product);
-        _pixelMartRepository.AddProduct(categoryId, productEntity);
+        await _pixelMartRepository.AddProductAsync(categoryId, productEntity);
         await _pixelMartRepository.SaveAsync();
 
         var productToReturn = _mapper.Map<ProductDto>(productEntity);
@@ -134,7 +134,7 @@ public class ProductsController : ControllerBase
         {
             var productToAdd = _mapper.Map<Product>(product);
             productToAdd.Id = productId;
-            _pixelMartRepository.AddProduct(categoryId, productToAdd);
+            await _pixelMartRepository.AddProductAsync(categoryId, productToAdd);
             await _pixelMartRepository.SaveAsync();
 
             var productToReturn = _mapper.Map<ProductDto>(productToAdd);
@@ -143,8 +143,7 @@ public class ProductsController : ControllerBase
         }
 
         _mapper.Map(product, productFromRepo); // apply the updated field values to the entity
-        _pixelMartRepository.UpdateProduct(productFromRepo);
-        await _pixelMartRepository.SaveAsync();
+        await _pixelMartRepository.UpdateProductAsync(productFromRepo);
 
         return NoContent();
     }
@@ -178,7 +177,7 @@ public class ProductsController : ControllerBase
             var productToAdd = _mapper.Map<Entities.Product>(productDto);
             productToAdd.Id = productId;
 
-            _pixelMartRepository.AddProduct(categoryId, productToAdd);
+            await _pixelMartRepository.AddProductAsync(categoryId, productToAdd);
             await _pixelMartRepository.SaveAsync();
 
             var productToReturn = _mapper.Map<ProductDto>(productToAdd);
@@ -197,9 +196,7 @@ public class ProductsController : ControllerBase
 
         _mapper.Map(productToPatch, productFromRepo);
 
-        _pixelMartRepository.UpdateProduct(productFromRepo);
-
-        await _pixelMartRepository.SaveAsync();
+        await _pixelMartRepository.UpdateProductAsync(productFromRepo);
 
         return NoContent();
     }
@@ -222,8 +219,7 @@ public class ProductsController : ControllerBase
             return NotFound();
         }
 
-        _pixelMartRepository.DeleteProduct(productFromRepo);
-        await _pixelMartRepository.SaveAsync();
+        await _pixelMartRepository.DeleteProductAsync(productFromRepo);
 
         return NoContent();
     }

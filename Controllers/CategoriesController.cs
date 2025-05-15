@@ -62,8 +62,7 @@ public class CategoriesController : ControllerBase
         _requestLogHelper.LogInfo("POST /api/categories CALLED TO CREATE A NEW CATEGORY");
 
         var categoryDto = _mapper.Map<Category>(category);
-        _pixelMartRepository.AddCategory(categoryDto);
-
+        await _pixelMartRepository.AddCategoryAsync(categoryDto);
         await _pixelMartRepository.SaveAsync();
 
         var categoryToReturn = _mapper.Map<CategoryDto>(categoryDto);
@@ -86,9 +85,7 @@ public class CategoriesController : ControllerBase
 
         _mapper.Map(category, categoryFromRepo); // apply the updated field values to the entity
 
-        _pixelMartRepository.UpdateCategory(categoryFromRepo);
-
-        await _pixelMartRepository.SaveAsync();
+        await _pixelMartRepository.UpdateCategoryAsync(categoryFromRepo);
 
         return NoContent();
     }
@@ -111,8 +108,7 @@ public class CategoriesController : ControllerBase
             return NotFound();
         }
 
-        _pixelMartRepository.DeleteCategory(categoryFromRepo);
-        await _pixelMartRepository.SaveAsync();
+        await _pixelMartRepository.DeleteCategoryAsync(categoryFromRepo);
 
         return NoContent();
     }
