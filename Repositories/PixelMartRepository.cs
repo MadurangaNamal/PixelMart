@@ -248,15 +248,15 @@ public class PixelMartRepository : IPixelMartRepository
 
     public async Task<IEnumerable<ShoppingCart>> GetAllCartDetailsAsync()
     {
-        return await _context.ShoppingCarts.AsNoTracking().ToListAsync();
+        return await _context.ShoppingCarts.Include(sc => sc.Items).AsNoTracking().ToListAsync();
     }
 
-    public async Task<ShoppingCart> GetCartDetailsForUserAsync(Guid userId)
+    public async Task<ShoppingCart?> GetCartDetailsForUserAsync(Guid userId)
     {
         if (userId == Guid.Empty)
             throw new ArgumentException("User ID cannot be empty.", nameof(userId));
 
-        return await _context.ShoppingCarts.AsNoTracking().FirstAsync(sc => sc.UserId.Equals(userId.ToString()));
+        return await _context.ShoppingCarts.Include(sc => sc.Items).AsNoTracking().FirstOrDefaultAsync(sc => sc.UserId == userId.ToString());
     }
 
     public async Task AddShoppingCartAsync(Guid userId, ShoppingCart shoppingCart)

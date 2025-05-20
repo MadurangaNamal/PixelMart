@@ -28,4 +28,17 @@ public class RequestLogHelper
 
         _logger.LogError(ex, "[{Time}] User: {User} - {Message}", timestamp, username, message);
     }
+
+    public Guid GetUserID()
+    {
+        var context = _httpContextAccessor.HttpContext;
+        var userIdClaim = context?.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+        if (Guid.TryParse(userIdClaim, out var userId))
+        {
+            return userId;
+        }
+
+        return Guid.Empty;
+    }
 }

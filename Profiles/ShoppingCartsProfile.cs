@@ -10,6 +10,9 @@ public class ShoppingCartsProfile : Profile
     {
         CreateMap<ShoppingCartManipulationDto, ShoppingCart>();
 
-        CreateMap<ShoppingCart, ShoppingCartDto>();
+        CreateMap<ShoppingCart, ShoppingCartDto>().ReverseMap();
+
+        CreateMap<CartItem, CartItemDto>().ReverseMap();
+
     }
 }
