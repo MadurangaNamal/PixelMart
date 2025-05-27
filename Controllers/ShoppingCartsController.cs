@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using PixelMart.API.Entities;
 using PixelMart.API.Helpers;
@@ -44,24 +45,24 @@ public class ShoppingCartsController : ControllerBase
         var userId = getLoggedUserId();
 
         if (userId == Guid.Empty)
-            return BadRequest("Invalid user ID.");
+            return BadRequest("Invalid user ID");
 
         var shoppingCart = await _pixelMartRepository.GetCartDetailsForUserAsync(userId);
 
         return Ok(_mapper.Map<ShoppingCartDto>(shoppingCart));
     }
 
-    [HttpPost]
-    public async Task<IActionResult> AddToShoppingCart(ShoppingCartManipulationDto shoppingCart)
+    [HttpPost("user-cart")]
+    public async Task<IActionResult> AddToShoppingCart(ShoppingCartCreationDto shoppingCartCreationDto)
     {
-        _requestLogHelper.LogInfo($"POST /api/shopping-carts CALLED TO ADD SHOPPING CART FOR A USER");
+        _requestLogHelper.LogInfo($"POST /api/shopping-carts/user-cart CALLED TO ADD SHOPPING CART FOR A USER");
 
         var userId = getLoggedUserId();
 
         if (userId == Guid.Empty)
-            return BadRequest("Invalid user ID.");
+            return BadRequest("Invalid user ID");
 
-        var cartEntity = _mapper.Map<ShoppingCart>(shoppingCart);
+        var cartEntity = _mapper.Map<ShoppingCart>(shoppingCartCreationDto);
 
         await _pixelMartRepository.AddShoppingCartAsync(userId, cartEntity);
         await _pixelMartRepository.SaveAsync();
@@ -69,6 +70,98 @@ public class ShoppingCartsController : ControllerBase
         var cartToReturn = _mapper.Map<ShoppingCartDto>(cartEntity);
 
         return CreatedAtRoute("GetCartForUser", cartToReturn);
+    }
+
+    [HttpPut("user-cart")]
+    public async Task<IActionResult> UpdateShoppingCart(ShoppingCartManipulationDto shoppingCartUpdateDto)
+    {
+        _requestLogHelper.LogInfo($"PUT /api/shopping-carts/user-cart CALLED TO UPDTAE THE SHOPPING CART FOR A USER");
+
+        var userId = getLoggedUserId();
+
+        if (userId == Guid.Empty)
+            return BadRequest("Invalid user ID");
+
+        var cartFromRepo = await _pixelMartRepository.GetCartDetailsForUserAsync(userId);
+
+        if (cartFromRepo == null)
+        {
+            var CartToAdd = _mapper.Map<ShoppingCart>(shoppingCartUpdateDto);
+
+            await _pixelMartRepository.AddShoppingCartAsync(userId, CartToAdd);
+            await _pixelMartRepository.SaveAsync();
+            return CreatedAtRoute("GetCartForUser", CartToAdd);
+        }
+
+        _mapper.Map(shoppingCartUpdateDto, cartFromRepo);
+        await _pixelMartRepository.UpdateShoppingCartAsync(userId, cartFromRepo);
+
+        return NoContent();
+    }
+
+    [HttpPatch("user-cart")]
+    public async Task<IActionResult> PartiallyUpdateShoppingCart(JsonPatchDocument<ShoppingCartUpdateDto> patchDocument)
+    {
+        _requestLogHelper.LogInfo($"PATCH /api/shopping-carts/user-cart CALLED TO PARTIALLY UPDTAE THE SHOPPING CART FOR A USER");
+
+        var userId = getLoggedUserId();
+
+        if (userId == Guid.Empty)
+            return BadRequest("Invalid user ID");
+
+        var cartFromRepo = await _pixelMartRepository.GetCartDetailsForUserAsync(userId);
+
+        if (cartFromRepo == null)
+        {
+            var shoppingCartDto = new ShoppingCartUpdateDto();
+            patchDocument.ApplyTo(shoppingCartDto, ModelState);
+
+            if (!TryValidateModel(shoppingCartDto))
+            {
+                return ValidationProblem(ModelState);
+            }
+
+            var cartToAdd = _mapper.Map<ShoppingCart>(shoppingCartDto);
+
+            await _pixelMartRepository.AddShoppingCartAsync(userId, cartToAdd);
+            await _pixelMartRepository.SaveAsync();
+
+            var cartToReturn = _mapper.Map<ShoppingCartDto>(cartToAdd);
+            return CreatedAtRoute("GetCartForUser", cartToReturn);
+
+        }
+
+        var shoppingCartToPatch = _mapper.Map<ShoppingCartUpdateDto>(cartFromRepo);
+        patchDocument.ApplyTo(shoppingCartToPatch, ModelState);
+
+        if (!TryValidateModel(shoppingCartToPatch))
+        {
+            return ValidationProblem(ModelState);
+        }
+
+        _mapper.Map(shoppingCartToPatch, cartFromRepo);
+        await _pixelMartRepository.UpdateShoppingCartAsync(userId, cartFromRepo);
+
+        return NoContent();
+    }
+
+    [HttpDelete("user-cart")]
+    public async Task<IActionResult> DeleteUserShoppingCart()
+    {
+        _requestLogHelper.LogInfo($"DELETE /api/shopping-carts/user-cart CALLED TO DELETE SHOPPING CART FOR USER");
+
+        var userId = getLoggedUserId();
+
+        if (userId == Guid.Empty)
+            return BadRequest("Invalid user ID");
+
+        var cartForUserFromRepo = await _pixelMartRepository.GetCartDetailsForUserAsync(userId);
+
+        if (cartForUserFromRepo is null)
+            return NotFound();
+
+        await _pixelMartRepository.DeleteShoppingCartAsync(cartForUserFromRepo);
+        return NoContent();
     }
 
     private Guid getLoggedUserId()

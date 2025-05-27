@@ -1,9 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace PixelMart.API.Models.ShoppingCart;
+﻿namespace PixelMart.API.Models.ShoppingCart;
 
 public class ShoppingCartManipulationDto
 {
-    [Required]
-    public ICollection<CartItemDto> Items { get; set; }
+    public virtual ICollection<CartItemDto> Items { get; set; }
 }

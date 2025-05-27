@@ -60,7 +60,7 @@ public class ProductsController : ControllerBase
         }
 
         if (!_propertyMappingService
-            .ValidMappingExistsFor<ProductDto, Entities.Product>(
+            .ValidMappingExistsFor<ProductDto, Product>(
                 productsResourceParameters.OrderBy))
         {
             return BadRequest();
@@ -108,7 +108,7 @@ public class ProductsController : ControllerBase
             return NotFound();
         }
 
-        var productEntity = _mapper.Map<Entities.Product>(product);
+        var productEntity = _mapper.Map<Product>(product);
         await _pixelMartRepository.AddProductAsync(categoryId, productEntity);
         await _pixelMartRepository.SaveAsync();
 
@@ -174,7 +174,7 @@ public class ProductsController : ControllerBase
                 return ValidationProblem(ModelState);
             }
 
-            var productToAdd = _mapper.Map<Entities.Product>(productDto);
+            var productToAdd = _mapper.Map<Product>(productDto);
             productToAdd.Id = productId;
 
             await _pixelMartRepository.AddProductAsync(categoryId, productToAdd);
@@ -208,19 +208,14 @@ public class ProductsController : ControllerBase
         _requestLogHelper.LogInfo($"DELETE /api/categories/{categoryId}/products/{productId} CALLED TO DELETE A PRODUCT");
 
         if (!await _pixelMartRepository.CategoryExistsAsync(categoryId))
-        {
             return NotFound();
-        }
 
         var productFromRepo = await _pixelMartRepository.GetproductAsync(categoryId, productId);
 
         if (productFromRepo == null)
-        {
             return NotFound();
-        }
 
         await _pixelMartRepository.DeleteProductAsync(productFromRepo);
-
         return NoContent();
     }
 
