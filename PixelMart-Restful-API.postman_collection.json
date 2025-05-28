@@ -182,7 +182,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"firstName\": \"Maduranga\",\r\n  \"lastName\": \"Wimalarathne\",\r\n  \"emailAddress\": \"madhuranganw@gmail.com\",\r\n  \"userName\": \"maduranga\",\r\n  \"password\": \"Maduranga@123\",\r\n  \"role\": \"Admin\"\r\n}",
+							"raw": "{\r\n  \"firstName\": \"TestUser\",\r\n  \"lastName\": \"TestUser\",\r\n  \"emailAddress\": \"testuser@gmail.com\",\r\n  \"userName\": \"testUser\",\r\n  \"password\": \"Testuser@123\",\r\n  \"role\": \"User\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -211,6 +211,62 @@
 						"body": {
 							"mode": "raw",
 							"raw": "{\r\n  \"emailAddress\": \"madhuranganw@gmail.com\",\r\n  \"password\": \"Maduranga@123\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{appBaseUrl}}/api/auth/login",
+							"host": [
+								"{{appBaseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "User Login Copy - User",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"emailAddress\": \"testuser@gmail.com\",\r\n  \"password\": \"Testuser@123\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{appBaseUrl}}/api/auth/login",
+							"host": [
+								"{{appBaseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "User Login Copy - Client",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"emailAddress\": \"testclient@gmail.com\",\r\n  \"password\": \"TestClient@123\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -608,6 +664,211 @@
 								"api",
 								"item-stocks",
 								"8885E0D9-DEEF-4BD1-91A3-08DD74577FAD"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Shopping Carts",
+			"item": [
+				{
+					"name": "Get all cart details",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{appBaseUrl}}/api/shopping-carts",
+							"host": [
+								"{{appBaseUrl}}"
+							],
+							"path": [
+								"api",
+								"shopping-carts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get cart for the user",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{appBaseUrl}}/api/shopping-carts/user-cart",
+							"host": [
+								"{{appBaseUrl}}"
+							],
+							"path": [
+								"api",
+								"shopping-carts",
+								"user-cart"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add shopping cart",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"items\": [\r\n    {\r\n      \"quantity\": 2,\r\n      \"productId\": \"8885E0D9-DEEF-4BD1-91A3-08DD74577FAD\"\r\n    },\r\n    {\r\n      \"quantity\": 3,\r\n      \"productId\": \"D6C8643D-F3FB-495C-F5DF-08DD8D44DB3C\"\r\n    }\r\n  ]\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{appBaseUrl}}/api/shopping-carts/user-cart",
+							"host": [
+								"{{appBaseUrl}}"
+							],
+							"path": [
+								"api",
+								"shopping-carts",
+								"user-cart"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update User Cart",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"items\": [\r\n    {\r\n      \"quantity\": 5,\r\n      \"productId\": \"8885E0D9-DEEF-4BD1-91A3-08DD74577FAD\"\r\n    },\r\n    {\r\n      \"quantity\": 5,\r\n      \"productId\": \"D6C8643D-F3FB-495C-F5DF-08DD8D44DB3C\"\r\n    }\r\n  ]\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{appBaseUrl}}/api/shopping-carts/user-cart",
+							"host": [
+								"{{appBaseUrl}}"
+							],
+							"path": [
+								"api",
+								"shopping-carts",
+								"user-cart"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Cart for User",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{appBaseUrl}}/api/shopping-carts/user-cart",
+							"host": [
+								"{{appBaseUrl}}"
+							],
+							"path": [
+								"api",
+								"shopping-carts",
+								"user-cart"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Partial Update User Cart",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "[\r\n  {\r\n    \"op\": \"replace\",\r\n    \"path\": \"/items/0/quantity\",\r\n    \"value\": 3\r\n  }\r\n]\r\n/* Sample payload to add new product to cart \r\n[\r\n  {\r\n    \"op\": \"add\",\r\n    \"path\": \"/items/-\",\r\n    \"value\": {\r\n      \"productId\": \"\",\r\n      \"quantity\": 2\r\n    }\r\n  }\r\n]\r\n*/",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{appBaseUrl}}/api/shopping-carts/user-cart",
+							"host": [
+								"{{appBaseUrl}}"
+							],
+							"path": [
+								"api",
+								"shopping-carts",
+								"user-cart"
 							]
 						}
 					},
