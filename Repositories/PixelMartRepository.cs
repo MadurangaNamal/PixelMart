@@ -269,14 +269,40 @@ public class PixelMartRepository : IPixelMartRepository
         await _context.ShoppingCarts.AddAsync(shoppingCart);
     }
 
-    public async Task UpdateShoppingCartAsync(Guid userId, ShoppingCart shoppingCart)
+    public async Task UpdateShoppingCartAsync(Guid userId, ShoppingCart updatedShoppingCart)
     {
         if (userId == Guid.Empty)
             throw new ArgumentException("User ID cannot be empty.", nameof(userId));
 
-        ArgumentNullException.ThrowIfNull(shoppingCart);
-        shoppingCart.UserId = userId.ToString();
-        _context.ShoppingCarts.Update(shoppingCart);
+        ArgumentNullException.ThrowIfNull(updatedShoppingCart);
+
+        var existingCart = await _context.ShoppingCarts
+            .Include(c => c.Items)
+            .FirstOrDefaultAsync(c => c.UserId == userId.ToString());
+
+        if (existingCart == null)
+            throw new InvalidOperationException("Shopping cart not found.");
+
+        foreach (var updatedItem in updatedShoppingCart.Items)
+        {
+            var existingItem = existingCart.Items
+                .FirstOrDefault(i => i.ProductId == updatedItem.ProductId);
+
+            if (existingItem != null)
+            {
+                existingItem.Quantity = updatedItem.Quantity;
+            }
+            else
+            {
+                existingCart.Items.Add(new CartItem
+                {
+                    ProductId = updatedItem.ProductId,
+                    Quantity = updatedItem.Quantity,
+                    ShoppingCartId = existingCart.Id
+                });
+            }
+        }
+
         await _context.SaveChangesAsync();
     }
 
