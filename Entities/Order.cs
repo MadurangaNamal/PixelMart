@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PixelMart.API.Entities;
 
@@ -30,8 +31,13 @@ public class Order
 
     public ICollection<OrderItem> Items { get; set; } = [];
 
-    // Foreign key for user
-    public string UserId { get; set; } = null!;
+    // Foreign key to ApplicationUser
+    [Required]
+    public string UserId { get; set; }
+
+    // Navigation property to ApplicationUser
+    [ForeignKey("UserId")]
+    public ApplicationUser User { get; set; }
 
     private static string GenerateOrderNumber()
     {
