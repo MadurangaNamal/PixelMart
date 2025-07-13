@@ -42,7 +42,18 @@ public interface IPixelMartRepository
     Task AddShoppingCartAsync(Guid userId, ShoppingCart shoppingCart);
     Task UpdateShoppingCartAsync(Guid userId, ShoppingCart shoppingCart);
     Task DeleteShoppingCartAsync(ShoppingCart cart);
+
     #endregion
+
+    #region Order
+
+    Task<IEnumerable<Order>> GetAllOrdersAsync();
+    Task<IEnumerable<Order>> GetOrdersForUserAsync(Guid userId);
+    Task CreateOrderAsync(Guid userId, Order order);
+    Task UpdateOrderAsync(Guid userId, Guid orderId, Order order);
+    Task CancelOrderAsync(Order order);
+    #endregion
+
 
     #region Common
     Task<bool> SaveAsync();

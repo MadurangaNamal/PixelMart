@@ -315,7 +315,95 @@ public class PixelMartRepository : IPixelMartRepository
 
     #endregion
 
+    #region Order
+
+    public async Task<IEnumerable<Order>> GetAllOrdersAsync()
+    {
+        var orders = await _context.Orders
+            .Include(sc => sc.Items)
+            .AsNoTracking()
+            .ToListAsync();
+
+        return orders;
+    }
+
+    public async Task<IEnumerable<Order>> GetOrdersForUserAsync(Guid userId)
+    {
+        var userOrders = await _context.Orders
+            .Include(sc => sc.Items)
+            .Where(o => o.UserId == userId.ToString())
+            .AsNoTracking()
+            .ToListAsync();
+
+        return userOrders;
+    }
+
+    public async Task CreateOrderAsync(Guid userId, Order order)
+    {
+        if (userId == Guid.Empty)
+            throw new ArgumentException("User ID cannot be empty.", nameof(userId));
+
+        ArgumentNullException.ThrowIfNull(order);
+        order.UserId = userId.ToString();
+
+        await _context.Orders.AddAsync(order);
+    }
+
+    public async Task UpdateOrderAsync(Guid userId, Guid orderId, Order orderUpdated)
+    {
+        if (userId == Guid.Empty)
+            throw new ArgumentException("User ID cannot be empty.", nameof(userId));
+
+        if (orderId == Guid.Empty)
+            throw new ArgumentException("Order ID cannot be empty.", nameof(orderId));
+
+        ArgumentNullException.ThrowIfNull(orderUpdated);
+
+        var userOrder = await _context.Orders
+            .Include(o => o.Items)
+            .FirstOrDefaultAsync(o => o.UserId == userId.ToString() && o.Id == orderId);
+
+        if (userOrder is null)
+            throw new InvalidOperationException("Order not found for user.");
+
+        orderUpdated.UserId = userId.ToString();
+
+        foreach (var orderItem in orderUpdated.Items)
+        {
+            var existingItem = orderUpdated.Items
+                .FirstOrDefault(i => i.ProductId == orderItem.ProductId);
+
+            if (existingItem is not null)
+            {
+                existingItem.Quantity = orderItem.Quantity;
+            }
+            else
+            {
+                orderUpdated.Items.Add(new OrderItem
+                {
+                    ProductId = orderItem.ProductId,
+                    Quantity = orderItem.Quantity,
+                    OrderId = orderId
+                });
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
+
+    }
+
+    public async Task CancelOrderAsync(Order order)
+    {
+        ArgumentNullException.ThrowIfNull(order);
+        _context.Orders.Remove(order);
+        await _context.SaveChangesAsync();
+    }
+
+    #endregion
+
     #region Common
+
     public async Task<bool> SaveAsync()
     {
         return await _context.SaveChangesAsync() >= 0;
