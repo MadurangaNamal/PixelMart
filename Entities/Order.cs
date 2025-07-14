@@ -41,7 +41,8 @@ public class Order
 
     private static string GenerateOrderNumber()
     {
-        return "ORD-" + DateTime.UtcNow.ToString("yyyyMMdd-HHmmss") + "-" + Guid.NewGuid().
-            ToString().Substring(0, 4).ToUpper();
+        return "ORD-" + DateTime.UtcNow
+            .ToString("yyyyMMdd-HHmmss") + "-" + Guid.NewGuid()
+            .ToString().Substring(0, 4).ToUpper();
     }
 }

@@ -2,5 +2,5 @@
 
 public class ShoppingCartManipulationDto
 {
-    public virtual ICollection<CartItemDto> Items { get; set; }
+    public virtual ICollection<CartItemDto> Items { get; set; } = [];
 }

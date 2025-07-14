@@ -1,5 +1,9 @@
-﻿namespace PixelMart.API.Models.Order;
+﻿using System.ComponentModel.DataAnnotations;
 
-public class OrderCreationDto
+namespace PixelMart.API.Models.Order;
+
+public class OrderCreationDto : OrderManipulationDto
 {
+    [Required]
+    public override required ICollection<OrderItemDto> Items { get; set; }
 }

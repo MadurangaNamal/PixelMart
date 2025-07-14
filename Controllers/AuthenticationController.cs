@@ -135,7 +135,7 @@ public class AuthenticationController : ControllerBase
     {
         var jwtTokenHandler = new JwtSecurityTokenHandler();
         var storedToken = await _context.RefreshTokens.FirstOrDefaultAsync(x => x.Token == tokenRequestDto.RefreshToken);
-        var dbUser = await _userManager.FindByIdAsync(storedToken.UserId);
+        var dbUser = await _userManager.FindByIdAsync(storedToken!.UserId);
 
         try
         {
