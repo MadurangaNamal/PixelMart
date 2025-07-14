@@ -1,5 +1,24 @@
-﻿namespace PixelMart.API.Profiles;
+﻿using AutoMapper;
+using PixelMart.API.Entities;
+using PixelMart.API.Models.Order;
 
-public class OrdersProfile
+namespace PixelMart.API.Profiles;
+
+public class OrdersProfile : Profile
 {
+    public OrdersProfile()
+    {
+        CreateMap<Order, OrderManipulationDto>();
+        CreateMap<Order, OrderUpdateDto>()
+            .IncludeBase<Order, OrderManipulationDto>();
+
+        CreateMap<OrderManipulationDto, Order>();
+        CreateMap<OrderUpdateDto, Order>()
+            .IncludeBase<OrderManipulationDto, Order>();
+
+        CreateMap<OrderItem, OrderItemDto>().ReverseMap();
+        CreateMap<Order, OrderDto>()
+            .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.Items))
+            .ReverseMap();
+    }
 }
