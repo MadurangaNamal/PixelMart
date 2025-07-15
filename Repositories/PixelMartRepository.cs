@@ -338,6 +338,16 @@ public class PixelMartRepository : IPixelMartRepository
         return userOrders;
     }
 
+    public Task<Order?> GetOrderForUserAsync(Guid userId, Guid orderId)
+    {
+        var order = _context.Orders
+            .Include(o => o.Items)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(o => o.UserId == userId.ToString() && o.Id == orderId);
+
+        return order ?? throw new InvalidOperationException("Order not found for user.");
+    }
+
     public async Task CreateOrderAsync(Guid userId, Order order)
     {
         if (userId == Guid.Empty)
