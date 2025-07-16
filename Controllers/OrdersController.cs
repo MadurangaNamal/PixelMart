@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using PixelMart.API.Entities;
 using PixelMart.API.Helpers;
 using PixelMart.API.Models.Identity;
 using PixelMart.API.Models.Order;
@@ -48,10 +49,10 @@ public class OrdersController : ControllerBase
         return Ok(_mapper.Map<IEnumerable<OrderDto>>(orders));
     }
 
-    [HttpGet("order/{orderId}")]
+    [HttpGet("user-order/{orderId}", Name = "GetOrderById")]
     public async Task<ActionResult<OrderDto>> GetOrderByOrderId(Guid orderId)
     {
-        _requestLogHelper.LogInfo($"GET /api/orders/order/orderId CALLED TO RETRIEVE AN ORDER FOR A USER");
+        _requestLogHelper.LogInfo($"GET /api/orders/user-order/orderId CALLED TO RETRIEVE AN ORDER FOR A USER");
 
         var userId = _requestLogHelper.GetUserID();
         var order = (userId != Guid.Empty) ? await _pixelMartRepository.GetOrderForUserAsync(userId, orderId) : null!;
@@ -62,4 +63,66 @@ public class OrdersController : ControllerBase
         return Ok(_mapper.Map<OrderDto>(order));
     }
 
+    [HttpPost("user-order")]
+    public async Task<IActionResult> CreateNewOrder(OrderCreationDto orderCreationDto)
+    {
+        _requestLogHelper.LogInfo($"POST /api/orders/user-order CALLED TO CREATE AN ORDER FOR A USER");
+
+        var userId = _requestLogHelper.GetUserID();
+
+        if (userId == Guid.Empty)
+            return BadRequest("Invalid user ID");
+
+        var orderEntity = _mapper.Map<Order>(orderCreationDto);
+
+        await _pixelMartRepository.CreateOrderAsync(userId, orderEntity);
+        await _pixelMartRepository.SaveAsync();
+
+        var orderToReturn = _mapper.Map<OrderDto>(orderEntity);
+
+        return CreatedAtRoute("GetOrderById", new { orderId = orderToReturn.Id }, orderToReturn);
+    }
+
+    [HttpPut("user-order/{orderId}")]
+    public async Task<IActionResult> UpdateOrder(Guid orderId, OrderUpdateDto orderUpdateDto)
+    {
+        _requestLogHelper.LogInfo($"PUT /api/orders/user-order/{orderId} CALLED TO UPDATE AN ORDER FOR A USER");
+
+        var userId = _requestLogHelper.GetUserID();
+
+        if (orderUpdateDto == null)
+            return BadRequest("Order update data is required.");
+
+        var orderFromRepo = await _pixelMartRepository.GetOrderForUserAsync(userId, orderId);
+
+        if (orderFromRepo is null)
+        {
+            return NotFound($"Order with ID {orderId} not found for the user.");
+        }
+
+        _mapper.Map(orderUpdateDto, orderFromRepo);
+
+        await _pixelMartRepository.UpdateOrderAsync(userId, orderId, orderFromRepo);
+
+        return NoContent();
+    }
+
+    [HttpDelete("user-order/{orderId}")]
+    public async Task<IActionResult> CancelOrder(Guid orderId)
+    {
+        _requestLogHelper.LogInfo($"DELETE /api/orders/user-order/{orderId} CALLED TO CANCEL AN ORDER FOR A USER");
+
+        var userId = _requestLogHelper.GetUserID();
+        if (userId == Guid.Empty)
+            return BadRequest("Invalid user ID");
+
+        var orderFromRepo = await _pixelMartRepository.GetOrderForUserAsync(userId, orderId);
+        if (orderFromRepo is null)
+            return NotFound($"Order with ID {orderId} not found for the user.");
+
+        await _pixelMartRepository.CancelOrderAsync(orderFromRepo);
+        await _pixelMartRepository.SaveAsync();
+
+        return NoContent();
+    }
 }

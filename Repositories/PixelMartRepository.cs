@@ -340,6 +340,12 @@ public class PixelMartRepository : IPixelMartRepository
 
     public Task<Order?> GetOrderForUserAsync(Guid userId, Guid orderId)
     {
+        if (userId == Guid.Empty)
+            throw new ArgumentException("User ID cannot be empty.", nameof(userId));
+
+        if (orderId == Guid.Empty)
+            throw new ArgumentException("Order ID cannot be empty.", nameof(orderId));
+
         var order = _context.Orders
             .Include(o => o.Items)
             .AsNoTracking()
@@ -376,32 +382,43 @@ public class PixelMartRepository : IPixelMartRepository
         if (userOrder is null)
             throw new InvalidOperationException("Order not found for user.");
 
-        orderUpdated.UserId = userId.ToString();
+        // Update scalar properties
+        userOrder.Status = orderUpdated.Status;
+        userOrder.ShippingAddress = orderUpdated.ShippingAddress;
+        userOrder.OrderDate = DateTime.UtcNow;
 
-        foreach (var orderItem in orderUpdated.Items)
+        // Update or add items
+        foreach (var updatedItem in orderUpdated.Items)
         {
-            var existingItem = orderUpdated.Items
-                .FirstOrDefault(i => i.ProductId == orderItem.ProductId);
+            var existingItem = userOrder.Items.FirstOrDefault(i => i.ProductId == updatedItem.ProductId);
 
-            if (existingItem is not null)
+            if (existingItem != null)
             {
-                existingItem.Quantity = orderItem.Quantity;
+                existingItem.Quantity = updatedItem.Quantity;
             }
             else
             {
-                orderUpdated.Items.Add(new OrderItem
+                userOrder.Items.Add(new OrderItem
                 {
-                    ProductId = orderItem.ProductId,
-                    Quantity = orderItem.Quantity,
+                    ProductId = updatedItem.ProductId,
+                    Quantity = updatedItem.Quantity,
                     OrderId = orderId
                 });
             }
-
-            await _context.SaveChangesAsync();
         }
 
+        // Remove items that are no longer present in the updated order
+        var updatedProductIds = orderUpdated.Items.Select(i => i.ProductId).ToHashSet();
+        var itemsToRemove = userOrder.Items.Where(i => !updatedProductIds.Contains(i.ProductId)).ToList();
 
+        foreach (var item in itemsToRemove)
+        {
+            userOrder.Items.Remove(item);
+        }
+
+        await _context.SaveChangesAsync();
     }
+
 
     public async Task CancelOrderAsync(Order order)
     {

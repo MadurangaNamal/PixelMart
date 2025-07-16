@@ -1,4 +1,6 @@
-﻿namespace PixelMart.API.Models.Order;
+﻿using PixelMart.API.Entities;
+
+namespace PixelMart.API.Models.Order;
 
 public class OrderDto
 {
@@ -8,6 +10,6 @@ public class OrderDto
     public decimal TotalAmount { get; set; }
     public string OrderStatus { get; set; } = null!;
     public string ShippingAddress { get; set; } = null!;
-    public ICollection<OrderItemDto> Items { get; set; } = [];
+    public ICollection<OrderItem> Items { get; set; } = [];
     public string UserId { get; set; } = null!;
 }

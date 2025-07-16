@@ -16,7 +16,6 @@ public class OrdersProfile : Profile
         CreateMap<OrderUpdateDto, Order>()
             .IncludeBase<OrderManipulationDto, Order>();
 
-        CreateMap<OrderItem, OrderItemDto>().ReverseMap();
         CreateMap<Order, OrderDto>()
             .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.Items))
             .ReverseMap();
