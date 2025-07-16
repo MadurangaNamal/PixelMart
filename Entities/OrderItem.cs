@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Newtonsoft.Json;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PixelMart.API.Entities;
@@ -16,11 +17,13 @@ public class OrderItem
 
     public Guid OrderId { get; set; }
 
+    [JsonIgnore]
     [ForeignKey("OrderId")]
-    public Order Order { get; set; } = null!;
+    public Order? Order { get; set; } = null!;
 
     public Guid ProductId { get; set; }
 
+    [JsonIgnore]
     [ForeignKey("ProductId")]
-    public Product Product { get; set; } = null!;
+    public Product? Product { get; set; } = null!;
 }
