@@ -8,16 +8,15 @@ public class OrdersProfile : Profile
 {
     public OrdersProfile()
     {
-        CreateMap<Order, OrderManipulationDto>();
-        CreateMap<Order, OrderUpdateDto>()
-            .IncludeBase<Order, OrderManipulationDto>();
-
-        CreateMap<OrderManipulationDto, Order>();
+        CreateMap<OrderManipulationDto, Order>()
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.OrderStatus));
         CreateMap<OrderUpdateDto, Order>()
             .IncludeBase<OrderManipulationDto, Order>();
-
+        CreateMap<OrderCreationDto, Order>()
+            .IncludeBase<OrderManipulationDto, Order>();
         CreateMap<Order, OrderDto>()
             .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.Items))
+            .ForMember(dest => dest.OrderStatus, opt => opt.MapFrom(src => src.Status))
             .ReverseMap();
     }
 }
