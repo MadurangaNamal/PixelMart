@@ -93,16 +93,18 @@ A modern **ASP.NET Core 8.0 Web API** for e-commerce operations featuring JWT au
 
 ```
 PixelMart.API/
-├── Controllers/          # API controllers
-├── Models/              # Entity models
-├── DTOs/                # Data Transfer Objects
-├── Services/            # Business logic layer
-├── Repositories/        # Data access layer
-├── Helpers/             # Utility classes
-├── Middleware/          # Custom middleware
-└── Data/               # Database context and migrations
+├── Properties/              # Project launch settings
+├── Controllers/             # API controllers
+├── Data/                    # Database context and Db initilizers
+├── Entities/                # Entity models
+├── Helpers/                 # Utility classes and extensions
+├── Migrations/              # Entity Framework migrations
+├── Models/                  # DTOs
+├── Profiles/                # AutoMapper profiles
+├── Repositories/            # Data access layer
+├── ResourceParameters/      # Query parameters for filtering/pagination
+└── Services/                # Property mapper services
 ```
-
 ## 🔧 Development
 
 ### Launch Profiles
