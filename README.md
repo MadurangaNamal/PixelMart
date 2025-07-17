@@ -40,7 +40,7 @@ A modern **ASP.NET Core 8.0 Web API** for e-commerce operations featuring JWT au
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/PixelMart.API.git
+   git clone https://github.com/MadurangaNamal/PixelMart.git
    cd PixelMart.API
    ```
 
@@ -50,7 +50,7 @@ A modern **ASP.NET Core 8.0 Web API** for e-commerce operations featuring JWT au
    ```json
    {
      "ConnectionStrings": {
-       "PixelMartDbContextConnection": "Server=(localdb)\\mssqllocaldb;Database=PixelMartDb;Trusted_Connection=true"
+       "PixelMartDbContextConnection": "Server=(localdb)\\mssqllocaldb;Database=PixelMartDB;Trusted_Connection=true"
      },
      "JWT": {
        "Secret": "your-super-secret-jwt-key-here",
@@ -138,8 +138,10 @@ Import the included `PixelMart-Restful-API.postman_collection.json` for comprehe
 ### Sample API Endpoints
 - `POST /api/auth/login` - User authentication
 - `GET /api/products` - List products with pagination
-- `POST /api/products` - Create new product (Admin only)
+- `POST /api/products` - Create new product 
+- `PUT /api/products/{id}` - Product update
 - `PATCH /api/products/{id}` - Partial product update
+- `DELETE /api/products/{id}` - Remove product (Admin only)
 - `GET /api/categories` - List all categories
 
 ## 🛡️ Security Features
@@ -161,7 +163,7 @@ Import the included `PixelMart-Restful-API.postman_collection.json` for comprehe
 ### Structured Logging
 - **Console logging** for development
 - **Debug logging** for detailed troubleshooting
-- **Request logging** with `RequestLogHelper`
+- **Request logging** for tracking all http Requests
 - **User action tracking** for audit trails
 
 ### Log Categories
@@ -200,7 +202,7 @@ For issues and questions:
 ##
 <div align="center">
 
-**Built with ❤️ using ASP.NET Core**
+**Built with ASP.NET Core**
 
 *Developed by [Maduranga Wimalarathne](mailto:madhuranganw@gmail.com)*
 
