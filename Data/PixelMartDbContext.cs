@@ -22,8 +22,6 @@ public class PixelMartDbContext : IdentityDbContext<ApplicationUser>
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        base.OnModelCreating(modelBuilder);
-
         modelBuilder.Entity<Product>()
             .HasOne(p => p.Category)
             .WithMany(c => c.Products)
@@ -86,5 +84,6 @@ public class PixelMartDbContext : IdentityDbContext<ApplicationUser>
             .Property(p => p.UnitPrice)
             .HasPrecision(18, 2);
 
+        base.OnModelCreating(modelBuilder);
     }
 }

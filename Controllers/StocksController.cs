@@ -22,7 +22,7 @@ public class StocksController : ControllerBase
     {
         _pixelMartRepository = pixelMartRepository ?? throw new ArgumentNullException(nameof(pixelMartRepository));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-        _requestLogHelper = requestLogHelper;
+        _requestLogHelper = requestLogHelper ?? throw new ArgumentNullException(nameof(requestLogHelper));
     }
 
     [Authorize(Roles = $"{UserRoles.Admin}, {UserRoles.User}")]
