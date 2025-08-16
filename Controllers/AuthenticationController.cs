@@ -68,7 +68,7 @@ public class AuthenticationController : ControllerBase
 
         if (result.Succeeded)
         {
-            //Add user role
+            // Add user role
 
             switch (registerDto.Role)
             {
@@ -86,12 +86,10 @@ public class AuthenticationController : ControllerBase
             }
 
             _requestLogHelper.LogInfo($"NEW {registerDto.Role} USER CREATED SUCCESSFULLY");
-
             return Ok("User created");
         }
 
-        _requestLogHelper.LogError(null, "USER CREATION FAILED");
-
+        _requestLogHelper.LogError(null!, "USER CREATION FAILED");
         return BadRequest("User could not be created");
     }
 
@@ -108,12 +106,11 @@ public class AuthenticationController : ControllerBase
         var userExists = await _userManager.FindByEmailAsync(loginDto.EmailAddress);
         if (userExists != null && await _userManager.CheckPasswordAsync(userExists, loginDto.Password))
         {
-            var tokenValue = await GenerateJWTTokenAsync(userExists, null);
+            var tokenValue = await GenerateJWTTokenAsync(userExists, null!);
             return Ok(tokenValue);
         }
 
-        _requestLogHelper.LogError(null, "UNAUTHORIZED LOGIN ATTEMPT");
-
+        _requestLogHelper.LogError(null!, "UNAUTHORIZED LOGIN ATTEMPT");
         return Unauthorized();
     }
 
@@ -135,7 +132,7 @@ public class AuthenticationController : ControllerBase
     {
         var jwtTokenHandler = new JwtSecurityTokenHandler();
         var storedToken = await _context.RefreshTokens.FirstOrDefaultAsync(x => x.Token == tokenRequestDto.RefreshToken);
-        var dbUser = await _userManager.FindByIdAsync(storedToken!.UserId);
+        var dbUser = await _userManager.FindByIdAsync(storedToken!.UserId) ?? throw new UnauthorizedAccessException("User not found");
 
         try
         {
@@ -151,7 +148,7 @@ public class AuthenticationController : ControllerBase
             }
             else
             {
-                return await GenerateJWTTokenAsync(dbUser, null);
+                return await GenerateJWTTokenAsync(dbUser, null!);
             }
         }
     }
@@ -160,22 +157,21 @@ public class AuthenticationController : ControllerBase
     {
         var authClaims = new List<Claim>()
             {
-                new(ClaimTypes.Name, user.UserName),
+                new(ClaimTypes.Name, user.UserName!),
                 new(ClaimTypes.NameIdentifier, user.Id),
-                new(JwtRegisteredClaimNames.Email, user.Email),
-                new(JwtRegisteredClaimNames.Sub, user.Email),
+                new(JwtRegisteredClaimNames.Email, user.Email!),
+                new(JwtRegisteredClaimNames.Sub, user.Email!),
                 new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 
-        //Add User Role Claims
+        // Add User Role Claims
         var userRoles = await _userManager.GetRolesAsync(user);
         foreach (var userRole in userRoles)
         {
             authClaims.Add(new Claim(ClaimTypes.Role, userRole));
         }
 
-
-        var authSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_configuration["JWT:Secret"]));
+        var authSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_configuration["JWT_SECRET_KEY"]!));
 
         var token = new JwtSecurityToken(
             issuer: _configuration["JWT:Issuer"],
@@ -209,7 +205,6 @@ public class AuthenticationController : ControllerBase
         await _context.RefreshTokens.AddAsync(refreshToken);
         await _context.SaveChangesAsync();
 
-
         var response = new AuthResultDto()
         {
             Token = jwtToken,
@@ -218,6 +213,5 @@ public class AuthenticationController : ControllerBase
         };
 
         return response;
-
     }
 }

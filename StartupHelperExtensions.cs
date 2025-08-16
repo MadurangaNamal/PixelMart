@@ -18,8 +18,16 @@ internal static class StartupHelperExtensions
 {
     public static WebApplication ConfigureServices(this WebApplicationBuilder builder)
     {
-        var connectionString = builder.Configuration.GetConnectionString("PixelMartDbContextConnection")
+        builder.Configuration.AddUserSecrets<Program>();
+
+        var rawConnectionString = builder.Configuration.GetConnectionString("PixelMartDbContextConnection")
             ?? throw new InvalidOperationException("Connection string 'PixelMartDbContextConnection' not found.");
+
+        var dbPassword = builder.Configuration["DB_PASSWORD"]
+            ?? throw new InvalidOperationException("Database password 'DB_PASSWORD' not found in configuration.");
+
+        var connectionString = rawConnectionString
+        .Replace("{DB_PASSWORD}", dbPassword);
 
         builder.Logging.ClearProviders();
         builder.Logging.AddConsole();
@@ -28,10 +36,13 @@ internal static class StartupHelperExtensions
         builder.Services.AddScoped<RequestLogHelper>();
         builder.Services.AddDbContext<PixelMartDbContext>(options => options.UseSqlServer(connectionString));
 
+        var jwtSecret = builder.Configuration["JWT_SECRET_KEY"]
+            ?? throw new InvalidOperationException("JWT secret key not found in configuration.");
+
         var tokenValidationParameters = new TokenValidationParameters()
         {
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(builder.Configuration["JWT:Secret"])),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwtSecret)),
 
             ValidateIssuer = true,
             ValidIssuer = builder.Configuration["JWT:Issuer"],
@@ -48,12 +59,12 @@ internal static class StartupHelperExtensions
         builder.Services.AddTransient<IPropertyCheckerService, PropertyCheckerService>();
         builder.Services.AddScoped<IPixelMartRepository, PixelMartRepository>();
 
-        //Add Identity
+        // Add Identity
         builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
             .AddEntityFrameworkStores<PixelMartDbContext>()
             .AddDefaultTokenProviders();
 
-        //Add Authentication
+        // Add Authentication
         builder.Services.AddAuthentication(options =>
         {
             options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -61,7 +72,7 @@ internal static class StartupHelperExtensions
             options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
         })
 
-        //Add JWT Bearer
+        // Add JWT Bearer
         .AddJwtBearer(options =>
         {
             options.SaveToken = true;
@@ -117,7 +128,7 @@ internal static class StartupHelperExtensions
         {
             c.SwaggerDoc("v1", new OpenApiInfo { Title = "PixelMart.API", Version = "v1" });
 
-            // 1. Define the Security Scheme
+            // Define the Security Scheme
             var jwtSecurityScheme = new OpenApiSecurityScheme
             {
                 Scheme = "bearer",
@@ -145,7 +156,6 @@ internal static class StartupHelperExtensions
             });
         });
 
-
         builder.Services.AddAutoMapper(typeof(Program));
 
         return builder.Build();
@@ -165,7 +175,7 @@ internal static class StartupHelperExtensions
         app.UseAuthorization();
         app.MapControllers();
 
-        //Seed the database with user roles
+        // Seed the database with user roles
         AppDbInitializer.SeedRolesToDb(app).Wait();
 
         return app;
