@@ -36,18 +36,6 @@ public class ProductsController : ControllerBase
         _requestLogHelper = requestLogHelper;
     }
 
-    //[HttpGet(Name = "GetProductsForCategory")]
-    //public async Task<ActionResult<IEnumerable<ProductDto>>> GetProductsForCategory(Guid categoryId)
-    //{
-    //    if (!await _pixelMartRepository.CategoryExistsAsync(categoryId))
-    //    {
-    //        return NotFound();
-    //    }
-
-    //    var productsFromRepo = await _pixelMartRepository.GetProductsAsync(categoryId);
-    //    return Ok(_mapper.Map<IEnumerable<ProductDto>>(productsFromRepo));
-    //}
-
     [HttpGet(Name = "GetProductsForCategory")]
     public async Task<ActionResult<IEnumerable<ProductDto>>> GetProducts(Guid categoryId,
         [FromQuery] ProductsResourceParameters productsResourceParameters)

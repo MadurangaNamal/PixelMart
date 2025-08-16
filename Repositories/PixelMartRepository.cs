@@ -129,6 +129,7 @@ public class PixelMartRepository : IPixelMartRepository
     #endregion
 
     #region Category
+
     public async Task AddCategoryAsync(Category category)
     {
         ArgumentNullException.ThrowIfNull(category);
@@ -164,7 +165,7 @@ public class PixelMartRepository : IPixelMartRepository
 
     public async Task<IEnumerable<Category>> GetCategoriesAsync()
     {
-        //return await _context.Categories.Include(c => c.Products).ToListAsync(); //include product details if need
+        // return await _context.Categories.Include(c => c.Products).ToListAsync(); // include product details if needed
         return await _context.Categories.AsNoTracking().ToListAsync();
     }
 
@@ -191,6 +192,7 @@ public class PixelMartRepository : IPixelMartRepository
     #endregion
 
     #region Stock
+
     public async Task<IEnumerable<Stock>> GetAllItemStocksAsync()
     {
         return await _context.Stocks.AsNoTracking().ToListAsync();
@@ -418,7 +420,6 @@ public class PixelMartRepository : IPixelMartRepository
 
         await _context.SaveChangesAsync();
     }
-
 
     public async Task CancelOrderAsync(Order order)
     {
