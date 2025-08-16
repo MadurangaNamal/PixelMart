@@ -26,8 +26,7 @@ internal static class StartupHelperExtensions
         var dbPassword = builder.Configuration["DB_PASSWORD"]
             ?? throw new InvalidOperationException("Database password 'DB_PASSWORD' not found in configuration.");
 
-        var connectionString = rawConnectionString
-        .Replace("{DB_PASSWORD}", dbPassword);
+        var connectionString = rawConnectionString.Replace("{DB_PASSWORD}", dbPassword);
 
         builder.Logging.ClearProviders();
         builder.Logging.AddConsole();
