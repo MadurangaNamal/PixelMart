@@ -1,0 +1,51 @@
+# Ignore git and version control
+.git
+.gitignore
+
+# User-specific files
+*.user
+*.swp
+*.suo
+*.userosscache
+*.sln.docstates
+
+# VS / VSCode settings
+.vs
+.vscode
+.idea
+*.code-workspace
+
+# Build outputs
+bin
+obj
+out
+debug
+release
+
+# Docker-related
+docker-compose*
+Dockerfile*
+
+# Node/npm
+node_modules
+npm-debug.log
+yarn-error.log
+
+# Azure / Kubernetes / Helm
+*.dbmdl
+*.jfm
+azds.yaml
+charts
+secrets.dev.yaml
+values.dev.yaml
+
+# Misc
+*.class
+*.classpath
+*.project
+*.settings
+*.toolstarget
+
+# Root files we don’t need inside images
+LICENSE
+README.md
