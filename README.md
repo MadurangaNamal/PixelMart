@@ -208,7 +208,7 @@ For issues and questions:
 
 [![.NET](https://img.shields.io/badge/.NET-8.0-512BD4?style=flat-square&logo=dotnet)](https://dotnet.microsoft.com/)
 [![ASP.NET Core](https://img.shields.io/badge/ASP.NET%20Core-8.0-512BD4?style=flat-square&logo=dotnet)](https://docs.microsoft.com/en-us/aspnet/core/)
-[![Entity Framework](https://img.shields.io/badge/Entity%20Framework-Core%209.0-512BD4?style=flat-square&logo=microsoft)](https://docs.microsoft.com/en-us/ef/)
+[![Entity Framework](https://img.shields.io/badge/Entity%20Framework-Core%208.0-512BD4?style=flat-square&logo=microsoft)](https://docs.microsoft.com/en-us/ef/)
 [![JWT](https://img.shields.io/badge/JWT-Authentication-000000?style=flat-square&logo=JSON%20web%20tokens)](https://jwt.io/)
 
 </div>
