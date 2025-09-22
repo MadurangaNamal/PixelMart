@@ -20,11 +20,7 @@ bin
 obj
 out
 debug
-release
-
-# Docker-related
-docker-compose*
-Dockerfile*
+release    
 
 # Node/npm
 node_modules
