@@ -20,8 +20,8 @@ internal static class StartupHelperExtensions
     {
         builder.Configuration.AddUserSecrets<Program>();
 
-        var rawConnectionString = builder.Configuration.GetConnectionString("PixelMartDbContextConnection")
-            ?? throw new InvalidOperationException("Connection string 'PixelMartDbContextConnection' not found.");
+        var rawConnectionString = builder.Configuration.GetConnectionString("PixelMartDbConnection")
+            ?? throw new InvalidOperationException("Connection string 'PixelMartDbConnection' not found.");
 
         var dbPassword = builder.Configuration["DB_PASSWORD"]
             ?? throw new InvalidOperationException("Database password 'DB_PASSWORD' not found in configuration.");
@@ -173,6 +173,12 @@ internal static class StartupHelperExtensions
         app.UseAuthentication();
         app.UseAuthorization();
         app.MapControllers();
+
+        using (var scope = app.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<PixelMartDbContext>();
+            db.Database.Migrate();
+        }
 
         // Seed the database with user roles
         AppDbInitializer.SeedRolesToDb(app).Wait();
