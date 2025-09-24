@@ -204,6 +204,36 @@
 					"response": []
 				},
 				{
+					"name": "Register New User Docker",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"firstName\": \"TestUser\",\r\n  \"lastName\": \"TestUser\",\r\n  \"emailAddress\": \"testuser@gmail.com\",\r\n  \"userName\": \"testUser\",\r\n  \"password\": \"Testuser@123\",\r\n  \"role\": \"User\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5001/api/auth/register",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5001",
+							"path": [
+								"api",
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "User Login - Admin",
 					"request": {
 						"method": "POST",
@@ -250,6 +280,36 @@
 							"host": [
 								"{{appBaseUrl}}"
 							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "User Login Copy - User Docker",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"emailAddress\": \"testuser@gmail.com\",\r\n  \"password\": \"Testuser@123\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5001/api/auth/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5001",
 							"path": [
 								"api",
 								"auth",
