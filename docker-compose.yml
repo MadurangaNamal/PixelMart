@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  pixelmart.api:
+  pixelmart-api:
     build:
       context: .
       dockerfile: Dockerfile
@@ -13,13 +13,13 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
-      - ConnectionStrings__PixelMartDbContextConnection=Server=sql-server;Database=PixelMartDB;User Id=sa;Password=${DB_PASSWORD};TrustServerCertificate=True;ConnectRetryCount=5;ConnectRetryInterval=10;
+      - ConnectionStrings__PixelMartDbConnection=Server=sql-server;Database=PixelMartDB;User Id=sa;Password=${DB_PASSWORD};TrustServerCertificate=True;ConnectRetryCount=5;ConnectRetryInterval=10;
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
-      - Jwt__Issuer=PixelMartAPI
-      - Jwt__Audience=PixelMartClient
+      - JWT__Issuer=PixelMartAPI
+      - JWT__Audience=PixelMartClient
+      - DB_PASSWORD=${DB_PASSWORD} 
     depends_on:
       - sql-server
-    restart: on-failure
     networks:
       - pixelmart-network
 
