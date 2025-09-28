@@ -2,6 +2,10 @@
 
 namespace PixelMart.API.Services.Impl;
 
+/// <summary>
+/// Service for checking if specified property names exist on a given type using reflection.
+/// Useful for validating dynamic field selection in APIs or queries.
+/// </summary>
 public class PropertyCheckerService : IPropertyCheckerService
 {
     public bool TypeHasProperties<T>(string? fields)
@@ -17,17 +21,13 @@ public class PropertyCheckerService : IPropertyCheckerService
         // check if the requested fields exist on source
         foreach (var field in fieldsAfterSplit)
         {
-            // trim each field, as it might contain leading 
-            // or trailing spaces. Can't trim the var in foreach,
-            // so use another var.
+            // trim each field, as it might contain leading or trailing spaces.
+            // Can't trim the var in foreach, so use another var.
             var propertyName = field.Trim();
 
-            // use reflection to check if the property can be
-            // found on T. 
-            var propertyInfo = typeof(T)
-                .GetProperty(propertyName,
-                BindingFlags.IgnoreCase | BindingFlags.Public |
-                BindingFlags.Instance);
+            // use reflection to check if the property can be found on T. 
+            var propertyInfo = typeof(T).GetProperty(propertyName,
+                BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
 
             // it can't be found, return false
             if (propertyInfo == null)

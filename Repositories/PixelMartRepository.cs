@@ -21,7 +21,7 @@ public class PixelMartRepository : IPixelMartRepository
     }
 
     #region Product
-    public async Task<Product> GetproductAsync(Guid categoryId, Guid productId)
+    public async Task<Product?> GetproductAsync(Guid categoryId, Guid productId)
     {
         if (categoryId == Guid.Empty)
         {
@@ -33,12 +33,10 @@ public class PixelMartRepository : IPixelMartRepository
             throw new ArgumentNullException(nameof(productId));
         }
 
-#pragma warning disable CS8603 // Possible null reference return.
         return await _context.Products
             .Where(p => p.Id == productId && p.CategoryId == categoryId)
             .AsNoTracking()
-            .FirstOrDefaultAsync();
-#pragma warning restore CS8603 // Possible null reference return.
+            .FirstOrDefaultAsync() ?? null;
 
     }
 
@@ -104,10 +102,7 @@ public class PixelMartRepository : IPixelMartRepository
         {
             // get property mapping dictionary
             var authorPropertyMappingDictionary = _propertyMappingService.GetPropertyMapping<ProductDto, Product>();
-
-#pragma warning disable S1854 // Unused assignments should be removed
             productsCollection = productsCollection.ApplySort(productsResourceParameters.OrderBy, authorPropertyMappingDictionary);
-#pragma warning restore S1854 // Unused assignments should be removed
 
         }
 
@@ -169,16 +164,16 @@ public class PixelMartRepository : IPixelMartRepository
         return await _context.Categories.AsNoTracking().ToListAsync();
     }
 
-    public async Task<Category> GetCategoryAsync(Guid categoryId)
+    public async Task<Category?> GetCategoryAsync(Guid categoryId)
     {
         if (categoryId == Guid.Empty)
         {
             throw new ArgumentException("Category ID cannot be empty.", nameof(categoryId));
         }
 
-#pragma warning disable CS8603 // Possible null reference return.
-        return await _context.Categories.Include(c => c.Products).FirstOrDefaultAsync(c => c.Id == categoryId);
-#pragma warning restore CS8603 // Possible null reference return.
+        return await _context.Categories
+            .Include(c => c.Products)
+            .FirstOrDefaultAsync(c => c.Id == categoryId) ?? null;
 
     }
 

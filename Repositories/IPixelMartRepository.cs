@@ -8,7 +8,7 @@ public interface IPixelMartRepository
 {
     #region Product
     Task<IEnumerable<Product>> GetProductsAsync(Guid categoryId);
-    Task<Product> GetproductAsync(Guid categoryId, Guid productId);
+    Task<Product?> GetproductAsync(Guid categoryId, Guid productId);
     Task AddProductAsync(Guid categoryId, Product product);
     Task UpdateProductAsync(Product product);
     Task DeleteProductAsync(Product product);
@@ -19,7 +19,7 @@ public interface IPixelMartRepository
 
     #region Category
     Task<IEnumerable<Category>> GetCategoriesAsync();
-    Task<Category> GetCategoryAsync(Guid categoryId);
+    Task<Category?> GetCategoryAsync(Guid categoryId);
     Task AddCategoryAsync(Category category);
     Task DeleteCategoryAsync(Category category);
     Task UpdateCategoryAsync(Category category);

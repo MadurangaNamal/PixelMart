@@ -4,6 +4,10 @@ using PixelMart.API.Models.Product;
 
 namespace PixelMart.API.Services.Impl;
 
+/// <summary>
+/// Service for managing property mappings between source and destination types.
+/// Enables flexible object-to-object mapping and validation of property mapping configurations, supporting dynamic field selection and sorting in APIs.
+/// </summary>
 public class PropertyMappingService : IPropertyMappingService
 {
     private readonly Dictionary<string, PropertyMappingValue> _productPropertyMapping = new(StringComparer.OrdinalIgnoreCase)
@@ -13,6 +17,7 @@ public class PropertyMappingService : IPropertyMappingService
             { "FullName", new(new[] { "Brand","Name" }) }
         };
 
+    // list of property mappings
     private readonly IList<IPropertyMapping> _propertyMappings = new List<IPropertyMapping>();
 
     public PropertyMappingService()
@@ -20,6 +25,7 @@ public class PropertyMappingService : IPropertyMappingService
         _propertyMappings.Add(new PropertyMapping<ProductDto, Product>(_productPropertyMapping));
     }
 
+    // Get the property mapping dictionary
     public Dictionary<string, PropertyMappingValue> GetPropertyMapping<TSource, TDestination>()
     {
 
@@ -31,9 +37,7 @@ public class PropertyMappingService : IPropertyMappingService
             return matchingMapping.First().MappingDictionary;
         }
 
-#pragma warning disable S112 // General or reserved exceptions should never be thrown
         throw new Exception($"Cannot find exact property mapping instance " + $"for <{typeof(TSource)},{typeof(TDestination)}");
-#pragma warning restore S112 // General or reserved exceptions should never be thrown
     }
 
     public bool ValidMappingExistsFor<TSource, TDestination>(string fields)
@@ -54,9 +58,7 @@ public class PropertyMappingService : IPropertyMappingService
             // trim
             var trimmedField = field.Trim();
 
-            // remove everything after the first " " - if the fields 
-            // are coming from an orderBy string, this part must be 
-            // ignored
+            // remove everything after the first " " if the fields are coming from an orderBy string, this part must be ignored
             var indexOfFirstSpace = trimmedField.IndexOf(" ");
             var propertyName = indexOfFirstSpace == -1 ?
                 trimmedField : trimmedField.Remove(indexOfFirstSpace);
