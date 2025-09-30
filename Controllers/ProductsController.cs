@@ -37,7 +37,8 @@ public class ProductsController : ControllerBase
     }
 
     [HttpGet(Name = "GetProductsForCategory")]
-    public async Task<ActionResult<IEnumerable<ProductDto>>> GetProducts(Guid categoryId,
+    public async Task<ActionResult<IEnumerable<ProductDto>>> GetProducts(
+        Guid categoryId,
         [FromQuery] ProductsResourceParameters productsResourceParameters)
     {
         _requestLogHelper.LogInfo($"GET /api/categories/{categoryId}/products CALLED TO RETRIEVE PRODUCTS FOR A CATEGORY");
@@ -47,9 +48,8 @@ public class ProductsController : ControllerBase
             return NotFound();
         }
 
-        if (!_propertyMappingService
-            .ValidMappingExistsFor<ProductDto, Product>(
-                productsResourceParameters.OrderBy))
+        // Validate the orderBy parameter
+        if (!_propertyMappingService.ValidMappingExistsFor<ProductDto, Product>(productsResourceParameters.OrderBy))
         {
             return BadRequest();
         }

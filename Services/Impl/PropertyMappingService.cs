@@ -40,6 +40,7 @@ public class PropertyMappingService : IPropertyMappingService
         throw new Exception($"Cannot find exact property mapping instance " + $"for <{typeof(TSource)},{typeof(TDestination)}");
     }
 
+    // Validates if a valid mapping exists for the given fields
     public bool ValidMappingExistsFor<TSource, TDestination>(string fields)
     {
         var propertyMapping = GetPropertyMapping<TSource, TDestination>();
@@ -55,13 +56,12 @@ public class PropertyMappingService : IPropertyMappingService
         // run through the fields clauses
         foreach (var field in fieldsAfterSplit)
         {
-            // trim
             var trimmedField = field.Trim();
 
-            // remove everything after the first " " if the fields are coming from an orderBy string, this part must be ignored
+            // remove everything after the first " " 
             var indexOfFirstSpace = trimmedField.IndexOf(" ");
-            var propertyName = indexOfFirstSpace == -1 ?
-                trimmedField : trimmedField.Remove(indexOfFirstSpace);
+
+            var propertyName = indexOfFirstSpace == -1 ? trimmedField : trimmedField.Remove(indexOfFirstSpace);
 
             // find the matching property
             if (!propertyMapping.ContainsKey(propertyName))
@@ -69,6 +69,7 @@ public class PropertyMappingService : IPropertyMappingService
                 return false;
             }
         }
+
         return true;
     }
 }
