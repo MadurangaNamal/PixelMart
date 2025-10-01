@@ -8,8 +8,8 @@ public class ShoppingCartDto
 
     public DateTime CreatedAt { get; set; }
 
-    public ICollection<CartItem> Items { get; set; }
+    public ICollection<CartItem> Items { get; set; } = [];
 
-    public string UserId { get; set; }
+    public string UserId { get; set; } = default!;
 
 }

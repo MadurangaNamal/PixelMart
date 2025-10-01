@@ -33,11 +33,11 @@ public class Order
 
     // Foreign key to ApplicationUser
     [Required]
-    public string UserId { get; set; }
+    public required string UserId { get; set; }
 
     // Navigation property to ApplicationUser
     [ForeignKey("UserId")]
-    public ApplicationUser User { get; set; }
+    public required ApplicationUser User { get; set; }
 
     private static string GenerateOrderNumber()
     {

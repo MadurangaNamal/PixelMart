@@ -253,7 +253,10 @@ public class PixelMartRepository : IPixelMartRepository
         if (userId == Guid.Empty)
             throw new ArgumentException("User ID cannot be empty.", nameof(userId));
 
-        return await _context.ShoppingCarts.Include(sc => sc.Items).AsNoTracking().FirstOrDefaultAsync(sc => sc.UserId == userId.ToString());
+        return await _context.ShoppingCarts
+            .Include(sc => sc.Items)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(sc => sc.UserId == userId.ToString()) ?? null;
     }
 
     public async Task AddShoppingCartAsync(Guid userId, ShoppingCart shoppingCart)

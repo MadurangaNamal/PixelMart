@@ -19,7 +19,7 @@ public class Product
 
     [Required]
     [MaxLength(100)]
-    public string Name { get; set; }
+    public string Name { get; set; } = default!;
 
     [MaxLength(250)]
     public string Brand { get; set; } = string.Empty;

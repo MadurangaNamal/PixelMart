@@ -85,7 +85,7 @@ public class CategoriesController : ControllerBase
 
         _mapper.Map(category, categoryFromRepo); // apply the updated field values to the entity
 
-        await _pixelMartRepository.UpdateCategoryAsync(categoryFromRepo);
+        await _pixelMartRepository.UpdateCategoryAsync(categoryFromRepo!);
 
         return NoContent();
     }

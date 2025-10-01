@@ -16,10 +16,10 @@ public class ShoppingCart
 
     // Foreign key to ApplicationUser
     [Required]
-    public string UserId { get; set; }
+    public string UserId { get; set; } = default!;
 
     // Navigation property to ApplicationUser
     [ForeignKey("UserId")]
-    public ApplicationUser User { get; set; }
+    public ApplicationUser User { get; set; } = default!;
 
 }

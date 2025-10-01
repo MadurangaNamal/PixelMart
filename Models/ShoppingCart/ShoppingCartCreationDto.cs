@@ -5,5 +5,5 @@ namespace PixelMart.API.Models.ShoppingCart;
 public class ShoppingCartCreationDto : ShoppingCartManipulationDto
 {
     [Required]
-    public override ICollection<CartItemDto> Items { get; set; }
+    public override required ICollection<CartItemDto> Items { get; set; }
 }

@@ -4,18 +4,18 @@ namespace PixelMart.API.Models.Identity;
 
 public class RegisterDto
 {
-    public string FirstName { get; set; }
-    public string LastName { get; set; }
+    public string FirstName { get; set; } = default!;
+    public string LastName { get; set; } = default!;
 
     [Required]
-    public string EmailAddress { get; set; }
+    public string EmailAddress { get; set; } = default!;
 
     [Required]
-    public string UserName { get; set; }
+    public string UserName { get; set; } = default!;
 
     [Required]
-    public string Password { get; set; }
+    public string Password { get; set; } = default!;
 
     [Required]
-    public string Role { get; set; }
+    public string Role { get; set; } = default!;
 }

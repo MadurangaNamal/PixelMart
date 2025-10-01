@@ -2,5 +2,5 @@
 
 public class ShoppingCartUpdateDto : ShoppingCartManipulationDto
 {
-    public override ICollection<CartItemDto> Items { get; set; }
+    public override ICollection<CartItemDto> Items { get; set; } = [];
 }

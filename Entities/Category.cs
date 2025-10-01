@@ -18,7 +18,7 @@ public class Category
 
     [Required]
     [MaxLength(50)]
-    public string Name { get; set; }
+    public string Name { get; set; } = default!;
 
     public ICollection<Product> Products { get; set; } = new List<Product>();
 }
