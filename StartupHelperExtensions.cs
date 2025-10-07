@@ -31,7 +31,7 @@ internal static class StartupHelperExtensions
         builder.Logging.ClearProviders();
         builder.Logging.AddConsole();
         builder.Logging.AddDebug();
-        builder.Services.AddHttpContextAccessor();
+        //builder.Services.AddHttpContextAccessor();
         builder.Services.AddScoped<RequestLogHelper>();
         builder.Services.AddDbContext<PixelMartDbContext>(options => options.UseSqlServer(connectionString));
 
@@ -57,6 +57,8 @@ internal static class StartupHelperExtensions
         builder.Services.AddTransient<IPropertyMappingService, PropertyMappingService>();
         builder.Services.AddTransient<IPropertyCheckerService, PropertyCheckerService>();
         builder.Services.AddScoped<IPixelMartRepository, PixelMartRepository>();
+        builder.Services.AddMemoryCache();
+        builder.Services.AddScoped<ICacheService, CacheService>();
 
         // Add Identity
         builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
