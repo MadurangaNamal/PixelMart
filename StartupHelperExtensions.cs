@@ -98,7 +98,6 @@ internal static class StartupHelperExtensions
             options.SaveToken = true;
             options.RequireHttpsMetadata = false;
             options.TokenValidationParameters = tokenValidationParameters;
-
             options.Events = new JwtBearerEvents
             {
                 OnAuthenticationFailed = context =>
@@ -139,8 +138,9 @@ internal static class StartupHelperExtensions
         builder.Services.AddControllers(configure =>
         {
             configure.ReturnHttpNotAcceptable = true;
-        }).AddNewtonsoftJson()
-        .AddXmlDataContractSerializerFormatters();
+        })
+            .AddNewtonsoftJson() // Add JSON support
+            .AddXmlDataContractSerializerFormatters(); // Add XML support
 
         builder.Services.AddEndpointsApiExplorer();
 
@@ -166,7 +166,6 @@ internal static class StartupHelperExtensions
             };
 
             c.AddSecurityDefinition("Bearer", jwtSecurityScheme);
-
             c.AddSecurityRequirement(new OpenApiSecurityRequirement
             {
                 {
@@ -181,13 +180,18 @@ internal static class StartupHelperExtensions
         return builder.Build();
     }
 
-    public static WebApplication ConfigurePipeline(this WebApplication app)
+    public static async Task<WebApplication> ConfigurePipelineAsync(this WebApplication app)
     {
         if (app.Environment.IsDevelopment())
         {
             app.UseDeveloperExceptionPage();
             app.UseSwagger();
             app.UseSwaggerUI();
+        }
+        else
+        {
+            app.UseExceptionHandler("/Error");
+            app.UseHsts();
         }
 
         app.UseHttpsRedirection();
@@ -200,10 +204,9 @@ internal static class StartupHelperExtensions
         {
             var db = scope.ServiceProvider.GetRequiredService<PixelMartDbContext>();
             db.Database.Migrate();
-        }
 
-        // Seed the database with user roles
-        AppDbInitializer.SeedRolesToDb(app).Wait();
+            await AppDbInitializer.SeedRolesToDb(app);
+        }
 
         return app;
     }
