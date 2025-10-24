@@ -158,6 +158,9 @@ Import the included `PixelMart-Restful-API.postman_collection.json` for comprehe
 - **Appropriate HTTP status codes** (401, 403, 404, 500)
 - **Detailed error messages** for development environment
 
+### Rate Limiting
+- Protects the API from abuse and accidental overload, a global rate limiter is enabled by default for all api endpoints
+
 ## 📊 Logging & Monitoring
 
 ### Structured Logging
