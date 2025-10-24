@@ -11,6 +11,7 @@ using PixelMart.API.Repositories;
 using PixelMart.API.Services;
 using PixelMart.API.Services.Impl;
 using System.Text;
+using System.Threading.RateLimiting;
 
 namespace PixelMart.API;
 
@@ -31,7 +32,6 @@ internal static class StartupHelperExtensions
         builder.Logging.ClearProviders();
         builder.Logging.AddConsole();
         builder.Logging.AddDebug();
-        //builder.Services.AddHttpContextAccessor();
         builder.Services.AddScoped<RequestLogHelper>();
         builder.Services.AddDbContext<PixelMartDbContext>(options => options.UseSqlServer(connectionString));
 
@@ -65,16 +65,35 @@ internal static class StartupHelperExtensions
             .AddEntityFrameworkStores<PixelMartDbContext>()
             .AddDefaultTokenProviders();
 
+        // Add Rate Limiter
+        builder.Services.AddRateLimiter(options =>
+        {
+            options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
+            {
+                var ipAddress = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+
+                return RateLimitPartition.GetFixedWindowLimiter(
+                    partitionKey: ipAddress,
+                    factory: _ => new FixedWindowRateLimiterOptions
+                    {
+                        PermitLimit = 100,
+                        Window = TimeSpan.FromMinutes(1),
+                        QueueLimit = 0
+                    });
+            });
+
+            options.RejectionStatusCode = 429;
+        });
+
         // Add Authentication
         builder.Services.AddAuthentication(options =>
         {
             options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
             options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-        })
 
-        // Add JWT Bearer
-        .AddJwtBearer(options =>
+        })  // Add JWT Bearer
+            .AddJwtBearer(options =>
         {
             options.SaveToken = true;
             options.RequireHttpsMetadata = false;
@@ -172,6 +191,7 @@ internal static class StartupHelperExtensions
         }
 
         app.UseHttpsRedirection();
+        app.UseRateLimiter();
         app.UseAuthentication();
         app.UseAuthorization();
         app.MapControllers();
