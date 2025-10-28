@@ -14,7 +14,6 @@ public class ProductsProfile : Profile
             .ForMember(dest => dest.IsLowStock, opt => opt.MapFrom(src => src.Stock!.IsLowStock));
 
         CreateMap<ProductForCreationDto, Product>();
-
         CreateMap<ProductForUpdateDto, Product>().ReverseMap();
     }
 }

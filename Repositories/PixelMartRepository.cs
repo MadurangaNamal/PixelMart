@@ -21,6 +21,7 @@ public class PixelMartRepository : IPixelMartRepository
     }
 
     #region Product
+
     public async Task<Product?> GetproductAsync(Guid categoryId, Guid productId)
     {
         if (categoryId == Guid.Empty)
@@ -37,7 +38,6 @@ public class PixelMartRepository : IPixelMartRepository
             .Where(p => p.Id == productId && p.CategoryId == categoryId)
             .AsNoTracking()
             .FirstOrDefaultAsync() ?? null;
-
     }
 
     public async Task<IEnumerable<Product>> GetProductsAsync(Guid categoryId)
@@ -70,6 +70,7 @@ public class PixelMartRepository : IPixelMartRepository
     public async Task UpdateProductAsync(Product product)
     {
         ArgumentNullException.ThrowIfNull(product);
+
         _context.Products.Update(product);
         await _context.SaveChangesAsync();
     }
@@ -77,6 +78,7 @@ public class PixelMartRepository : IPixelMartRepository
     public async Task DeleteProductAsync(Product product)
     {
         ArgumentNullException.ThrowIfNull(product);
+
         _context.Products.Remove(product);
         await _context.SaveChangesAsync();
     }
@@ -95,15 +97,17 @@ public class PixelMartRepository : IPixelMartRepository
         if (!string.IsNullOrWhiteSpace(productsResourceParameters.SearchQuery))
         {
             var searchQuery = productsResourceParameters.SearchQuery.Trim();
-            productsCollection = productsCollection.Where(a => a.Name.Contains(searchQuery) || a.Brand.Contains(searchQuery));
+            productsCollection = productsCollection
+                .Where(a => a.Name.Contains(searchQuery) || a.Brand.Contains(searchQuery));
         }
 
         if (!string.IsNullOrWhiteSpace(productsResourceParameters.OrderBy))
         {
             // get property mapping dictionary
             var authorPropertyMappingDictionary = _propertyMappingService.GetPropertyMapping<ProductDto, Product>();
-            productsCollection = productsCollection.ApplySort(productsResourceParameters.OrderBy, authorPropertyMappingDictionary);
 
+            productsCollection = productsCollection
+                .ApplySort(productsResourceParameters.OrderBy, authorPropertyMappingDictionary);
         }
 
         return await PagedList<Product>.CreateAsync(productsCollection,
@@ -128,6 +132,7 @@ public class PixelMartRepository : IPixelMartRepository
     public async Task AddCategoryAsync(Category category)
     {
         ArgumentNullException.ThrowIfNull(category);
+
         category.Id = Guid.NewGuid();
 
         if (category.Products.Any())
@@ -154,6 +159,7 @@ public class PixelMartRepository : IPixelMartRepository
     public async Task DeleteCategoryAsync(Category category)
     {
         ArgumentNullException.ThrowIfNull(category);
+
         _context.Categories.Remove(category);
         await _context.SaveChangesAsync();
     }
@@ -174,12 +180,12 @@ public class PixelMartRepository : IPixelMartRepository
         return await _context.Categories
             .Include(c => c.Products)
             .FirstOrDefaultAsync(c => c.Id == categoryId) ?? null;
-
     }
 
     public async Task UpdateCategoryAsync(Category category)
     {
         ArgumentNullException.ThrowIfNull(category);
+
         _context.Categories.Update(category);
         await _context.SaveChangesAsync();
     }
@@ -211,6 +217,7 @@ public class PixelMartRepository : IPixelMartRepository
         }
 
         ArgumentNullException.ThrowIfNull(stock);
+
         stock.ProductId = productId;
         await _context.Stocks.AddAsync(stock);
     }
@@ -223,9 +230,9 @@ public class PixelMartRepository : IPixelMartRepository
         }
 
         ArgumentNullException.ThrowIfNull(itemStock);
+
         itemStock.ProductId = productId;
         _context.Stocks.Update(itemStock);
-
         await _context.SaveChangesAsync();
     }
 
@@ -265,6 +272,7 @@ public class PixelMartRepository : IPixelMartRepository
             throw new ArgumentException("User ID cannot be empty.", nameof(userId));
 
         ArgumentNullException.ThrowIfNull(shoppingCart);
+
         shoppingCart.UserId = userId.ToString();
         await _context.ShoppingCarts.AddAsync(shoppingCart);
     }
@@ -309,6 +317,7 @@ public class PixelMartRepository : IPixelMartRepository
     public async Task DeleteShoppingCartAsync(ShoppingCart cart)
     {
         ArgumentNullException.ThrowIfNull(cart);
+
         _context.ShoppingCarts.Remove(cart);
         await _context.SaveChangesAsync();
     }
@@ -360,8 +369,8 @@ public class PixelMartRepository : IPixelMartRepository
             throw new ArgumentException("User ID cannot be empty.", nameof(userId));
 
         ArgumentNullException.ThrowIfNull(order);
-        order.UserId = userId.ToString();
 
+        order.UserId = userId.ToString();
         await _context.Orders.AddAsync(order);
     }
 
@@ -390,7 +399,8 @@ public class PixelMartRepository : IPixelMartRepository
         // Update or add items
         foreach (var updatedItem in orderUpdated.Items)
         {
-            var existingItem = userOrder.Items.FirstOrDefault(i => i.ProductId == updatedItem.ProductId);
+            var existingItem = userOrder.Items
+                .FirstOrDefault(i => i.ProductId == updatedItem.ProductId);
 
             if (existingItem != null)
             {
@@ -398,18 +408,24 @@ public class PixelMartRepository : IPixelMartRepository
             }
             else
             {
-                userOrder.Items.Add(new OrderItem
-                {
-                    ProductId = updatedItem.ProductId,
-                    Quantity = updatedItem.Quantity,
-                    OrderId = orderId
-                });
+                userOrder.Items.Add(
+                    new OrderItem
+                    {
+                        ProductId = updatedItem.ProductId,
+                        Quantity = updatedItem.Quantity,
+                        OrderId = orderId
+                    });
             }
         }
 
         // Remove items that are no longer present in the updated order
-        var updatedProductIds = orderUpdated.Items.Select(i => i.ProductId).ToHashSet();
-        var itemsToRemove = userOrder.Items.Where(i => !updatedProductIds.Contains(i.ProductId)).ToList();
+        var updatedProductIds = orderUpdated.Items
+            .Select(i => i.ProductId)
+            .ToHashSet();
+
+        var itemsToRemove = userOrder.Items
+            .Where(i => !updatedProductIds.Contains(i.ProductId))
+            .ToList();
 
         foreach (var item in itemsToRemove)
         {
@@ -422,6 +438,7 @@ public class PixelMartRepository : IPixelMartRepository
     public async Task CancelOrderAsync(Order order)
     {
         ArgumentNullException.ThrowIfNull(order);
+
         _context.Orders.Remove(order);
         await _context.SaveChangesAsync();
     }
@@ -432,8 +449,9 @@ public class PixelMartRepository : IPixelMartRepository
 
     public async Task<bool> SaveAsync()
     {
-        return await _context.SaveChangesAsync() >= 0;
+        return await _context.SaveChangesAsync() >= 0; // SaveChangesAsync result contain no entries written to the DB
     }
 
     #endregion
+
 }

@@ -10,10 +10,13 @@ public class OrdersProfile : Profile
     {
         CreateMap<OrderManipulationDto, Order>()
             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.OrderStatus));
+
         CreateMap<OrderUpdateDto, Order>()
             .IncludeBase<OrderManipulationDto, Order>();
+
         CreateMap<OrderCreationDto, Order>()
             .IncludeBase<OrderManipulationDto, Order>();
+
         CreateMap<Order, OrderDto>()
             .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.Items))
             .ForMember(dest => dest.OrderStatus, opt => opt.MapFrom(src => src.Status))

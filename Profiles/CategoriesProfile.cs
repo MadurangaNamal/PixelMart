@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using PixelMart.API.Entities;
 using PixelMart.API.Models.Category;
 
 namespace PixelMart.API.Profiles;
@@ -7,10 +8,8 @@ public class CategoriesProfile : Profile
 {
     public CategoriesProfile()
     {
-        CreateMap<Entities.Category, CategoryDto>().ReverseMap();
-
-        CreateMap<CategoryForCreationDto, Entities.Category>();
-
-        CreateMap<CategoryForUpdateDto, Entities.Category>();
+        CreateMap<Category, CategoryDto>().ReverseMap();
+        CreateMap<CategoryForCreationDto, Category>();
+        CreateMap<CategoryForUpdateDto, Category>();
     }
 }

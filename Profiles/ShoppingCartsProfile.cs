@@ -9,14 +9,14 @@ public class ShoppingCartsProfile : Profile
     public ShoppingCartsProfile()
     {
         CreateMap<ShoppingCart, ShoppingCartManipulationDto>();
+        CreateMap<ShoppingCart, ShoppingCartDto>().ReverseMap();
+        CreateMap<CartItem, CartItemDto>().ReverseMap();
+        CreateMap<ShoppingCartManipulationDto, ShoppingCart>();
+
         CreateMap<ShoppingCart, ShoppingCartUpdateDto>()
             .IncludeBase<ShoppingCart, ShoppingCartManipulationDto>();
 
-        CreateMap<ShoppingCartManipulationDto, ShoppingCart>();
         CreateMap<ShoppingCartUpdateDto, ShoppingCart>()
             .IncludeBase<ShoppingCartManipulationDto, ShoppingCart>();
-
-        CreateMap<ShoppingCart, ShoppingCartDto>().ReverseMap();
-        CreateMap<CartItem, CartItemDto>().ReverseMap();
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace PixelMart.API.Helpers;
+﻿using System.Security.Claims;
+
+namespace PixelMart.API.Helpers;
 
 public class RequestLogHelper
 {
@@ -7,8 +9,8 @@ public class RequestLogHelper
 
     public RequestLogHelper(IHttpContextAccessor httpContextAccessor, ILogger<RequestLogHelper> logger)
     {
-        _httpContextAccessor = httpContextAccessor;
-        _logger = logger;
+        _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     public void LogInfo(string message)
@@ -32,7 +34,7 @@ public class RequestLogHelper
     public Guid GetUserID()
     {
         var context = _httpContextAccessor.HttpContext;
-        var userIdClaim = context?.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        var userIdClaim = context?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
         if (Guid.TryParse(userIdClaim, out var userId))
         {

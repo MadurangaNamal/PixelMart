@@ -11,6 +11,7 @@ using PixelMart.API.Repositories;
 using PixelMart.API.Services;
 using PixelMart.API.Services.Impl;
 using System.Text;
+using System.Text.Json;
 using System.Threading.RateLimiting;
 
 namespace PixelMart.API;
@@ -32,6 +33,7 @@ internal static class StartupHelperExtensions
         builder.Logging.ClearProviders();
         builder.Logging.AddConsole();
         builder.Logging.AddDebug();
+        builder.Services.AddHttpContextAccessor();
         builder.Services.AddScoped<RequestLogHelper>();
         builder.Services.AddDbContext<PixelMartDbContext>(options => options.UseSqlServer(connectionString));
 
@@ -105,7 +107,7 @@ internal static class StartupHelperExtensions
                     context.NoResult();
                     context.Response.StatusCode = 401;
                     context.Response.ContentType = "application/json";
-                    return context.Response.WriteAsync(System.Text.Json.JsonSerializer.Serialize(new
+                    return context.Response.WriteAsync(JsonSerializer.Serialize(new
                     {
                         StatusCode = 401,
                         Message = "Authentication failed. Token is invalid or expired."
@@ -116,7 +118,7 @@ internal static class StartupHelperExtensions
                     context.HandleResponse();
                     context.Response.StatusCode = 401;
                     context.Response.ContentType = "application/json";
-                    return context.Response.WriteAsync(System.Text.Json.JsonSerializer.Serialize(new
+                    return context.Response.WriteAsync(JsonSerializer.Serialize(new
                     {
                         StatusCode = 401,
                         Message = "Unauthorized access. Please provide a valid token."
@@ -126,7 +128,7 @@ internal static class StartupHelperExtensions
                 {
                     context.Response.StatusCode = 403;
                     context.Response.ContentType = "application/json";
-                    return context.Response.WriteAsync(System.Text.Json.JsonSerializer.Serialize(new
+                    return context.Response.WriteAsync(JsonSerializer.Serialize(new
                     {
                         StatusCode = 403,
                         Message = "Forbidden. You do not have permission to access this resource."

@@ -32,9 +32,8 @@ public static class IQueryableExtensions
         // apply each orderby clause  
         foreach (var orderByClause in orderByAfterSplit)
         {
-            // trim the orderBy clause, as it might contain leading
-            // or trailing spaces. Can't trim the var in foreach,
-            // so use another var.
+            // trim the orderBy clause, as it might contain leading or trailing spaces.
+            // Can't trim the var in foreach,so use another var.
             var trimmedOrderByClause = orderByClause.Trim();
 
             // if the sort option ends with with " desc", we order
@@ -72,12 +71,8 @@ public static class IQueryableExtensions
             foreach (var destinationProperty in
                 propertyMappingValue.DestinationProperties)
             {
-#pragma warning disable S1643 // Strings should not be concatenated using '+' in a loop
-                orderByString = orderByString +
-                    (string.IsNullOrWhiteSpace(orderByString) ? string.Empty : ", ")
-                    + destinationProperty
-                    + (orderDescending ? " descending" : " ascending");
-#pragma warning restore S1643 // Strings should not be concatenated using '+' in a loop
+                orderByString = orderByString + (string.IsNullOrWhiteSpace(orderByString) ? string.Empty : ", ")
+                    + destinationProperty + (orderDescending ? " descending" : " ascending");
             }
         }
 

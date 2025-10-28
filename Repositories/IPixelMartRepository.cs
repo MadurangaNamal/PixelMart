@@ -53,8 +53,8 @@ public interface IPixelMartRepository
     Task CreateOrderAsync(Guid userId, Order order);
     Task UpdateOrderAsync(Guid userId, Guid orderId, Order order);
     Task CancelOrderAsync(Order order);
-    #endregion
 
+    #endregion
 
     #region Common
     Task<bool> SaveAsync();
