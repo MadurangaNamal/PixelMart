@@ -24,16 +24,19 @@ public class ProductsController : ControllerBase
     private readonly IMapper _mapper;
     private readonly IPropertyMappingService _propertyMappingService;
     private readonly RequestLogHelper _requestLogHelper;
+    private readonly ICacheService _cacheService;
 
     public ProductsController(IPixelMartRepository pixelMartRepository,
         IMapper mapper,
         IPropertyMappingService propertyMappingService,
-        RequestLogHelper requestLogHelper)
+        RequestLogHelper requestLogHelper,
+        ICacheService cacheService)
     {
         _pixelMartRepository = pixelMartRepository ?? throw new ArgumentNullException(nameof(pixelMartRepository));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-        _propertyMappingService = propertyMappingService;
-        _requestLogHelper = requestLogHelper;
+        _propertyMappingService = propertyMappingService ?? throw new ArgumentNullException(nameof(propertyMappingService));
+        _requestLogHelper = requestLogHelper ?? throw new ArgumentNullException(nameof(requestLogHelper));
+        _cacheService = cacheService ?? throw new ArgumentNullException(nameof(cacheService));
     }
 
     [HttpGet(Name = "GetProductsForCategory")]
@@ -69,20 +72,33 @@ public class ProductsController : ControllerBase
     {
         _requestLogHelper.LogInfo($"GET /api/categories/{categoryId}/products/{productId} CALLED TO RETRIEVE SINGLE PRODUCT");
 
-        if (!await _pixelMartRepository.CategoryExistsAsync(categoryId))
+        var cacheKey = _cacheService.GetCategoryProductKey(categoryId, productId);
+
+        if (_cacheService.GetProductDto(cacheKey) is { } cachedProductDto)
         {
-            return NotFound();
+            _requestLogHelper.LogInfo($"Cache HIT for Product {productId} in Category {categoryId}");
+            return Ok(cachedProductDto);
         }
 
-        var productFromRepo = await _pixelMartRepository.GetproductAsync(categoryId, productId);
+        var categoryExistsTask = _pixelMartRepository.CategoryExistsAsync(categoryId);
+        var productTask = _pixelMartRepository.GetproductAsync(categoryId, productId);
 
+        await Task.WhenAll(categoryExistsTask, productTask);
+
+        if (!categoryExistsTask.Result)
+            return NotFound();
+
+        var productFromRepo = productTask.Result;
         if (productFromRepo == null)
-        {
             return NotFound();
-        }
 
-        productFromRepo.Stock = _pixelMartRepository.GetItemStockAsync(productFromRepo.Id).Result;
-        return Ok(_mapper.Map<ProductDto>(productFromRepo));
+        productFromRepo.Stock = await _pixelMartRepository.GetItemStockAsync(productFromRepo.Id);
+
+        var productDto = _mapper.Map<ProductDto>(productFromRepo);
+        _cacheService.SetProductDto(cacheKey, productDto);
+        _requestLogHelper.LogInfo($"Cache MISS for Product {productId} in Category {categoryId}");
+
+        return Ok(productDto);
     }
 
     [Authorize(Roles = $"{UserRoles.Admin}, {UserRoles.User}")]

@@ -4,7 +4,7 @@ namespace PixelMart.API.Services;
 
 public interface ICacheService
 {
-    void SetProductDto(Guid productId, ProductDto productDto, TimeSpan? expiry = null);
-    ProductDto? GetProductDto(Guid productId);
-    void SetAllProductDtos(Dictionary<Guid, ProductDto> products, TimeSpan? expiry = null);
+    void SetProductDto(string key, ProductDto productDto, TimeSpan? expiry = null);
+    ProductDto? GetProductDto(string key);
+    string GetCategoryProductKey(Guid categoryId, Guid productId);
 }

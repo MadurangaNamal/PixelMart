@@ -40,7 +40,8 @@ public class AuthenticationController : ControllerBase
     }
 
     [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
+    public async Task<IActionResult> Register(
+        [FromBody] RegisterDto registerDto)
     {
         _requestLogHelper.LogInfo("POST /api/auth/register CALLED TO REGISTER NEW USER");
 
@@ -50,6 +51,7 @@ public class AuthenticationController : ControllerBase
         }
 
         var userExists = await _userManager.FindByEmailAsync(registerDto.EmailAddress);
+
         if (userExists != null)
         {
             return BadRequest($"User {registerDto.EmailAddress} already exists");
@@ -69,7 +71,6 @@ public class AuthenticationController : ControllerBase
         if (result.Succeeded)
         {
             // Add user role
-
             switch (registerDto.Role)
             {
                 case UserRoles.Admin:
@@ -86,15 +87,18 @@ public class AuthenticationController : ControllerBase
             }
 
             _requestLogHelper.LogInfo($"NEW {registerDto.Role} USER CREATED SUCCESSFULLY");
+
             return Ok("User created");
         }
 
         _requestLogHelper.LogError(null!, "USER CREATION FAILED");
+
         return BadRequest("User could not be created");
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
+    public async Task<IActionResult> Login(
+        [FromBody] LoginDto loginDto)
     {
         _requestLogHelper.LogInfo("POST /api/auth/login CALLED TO LOGIN USER");
 
@@ -104,6 +108,7 @@ public class AuthenticationController : ControllerBase
         }
 
         var userExists = await _userManager.FindByEmailAsync(loginDto.EmailAddress);
+
         if (userExists != null && await _userManager.CheckPasswordAsync(userExists, loginDto.Password))
         {
             var tokenValue = await GenerateJWTTokenAsync(userExists, null!);
@@ -115,7 +120,8 @@ public class AuthenticationController : ControllerBase
     }
 
     [HttpPost("refresh-token")]
-    public async Task<IActionResult> RefreshToken([FromBody] TokenRequestDto tokenRequestDto)
+    public async Task<IActionResult> RefreshToken(
+        [FromBody] TokenRequestDto tokenRequestDto)
     {
         _requestLogHelper.LogInfo("POST /api/auth/refresh-token CALLED TO REFRESH TOKEN");
 
@@ -131,12 +137,18 @@ public class AuthenticationController : ControllerBase
     private async Task<AuthResultDto> VerifyAndGenerateTokenAsync(TokenRequestDto tokenRequestDto)
     {
         var jwtTokenHandler = new JwtSecurityTokenHandler();
-        var storedToken = await _context.RefreshTokens.FirstOrDefaultAsync(x => x.Token == tokenRequestDto.RefreshToken);
-        var dbUser = await _userManager.FindByIdAsync(storedToken!.UserId) ?? throw new UnauthorizedAccessException("User not found");
+
+        var storedToken = await _context.RefreshTokens
+            .FirstOrDefaultAsync(x => x.Token == tokenRequestDto.RefreshToken);
+
+        var dbUser = await _userManager.FindByIdAsync(storedToken!.UserId)
+            ?? throw new UnauthorizedAccessException("User not found");
 
         try
         {
-            var tokenCheckResult = jwtTokenHandler.ValidateToken(tokenRequestDto.Token, _tokenValidationParameters, out var validatedToken);
+            var tokenCheckResult = jwtTokenHandler.ValidateToken(tokenRequestDto.Token,
+                _tokenValidationParameters,
+                out var validatedToken);
 
             return await GenerateJWTTokenAsync(dbUser, storedToken);
         }
@@ -166,6 +178,7 @@ public class AuthenticationController : ControllerBase
 
         // Add User Role Claims
         var userRoles = await _userManager.GetRolesAsync(user);
+
         foreach (var userRole in userRoles)
         {
             authClaims.Add(new Claim(ClaimTypes.Role, userRole));
@@ -202,6 +215,7 @@ public class AuthenticationController : ControllerBase
             DateExpire = DateTime.UtcNow.AddMonths(6),
             Token = Guid.NewGuid().ToString() + "-" + Guid.NewGuid().ToString()
         };
+
         await _context.RefreshTokens.AddAsync(refreshToken);
         await _context.SaveChangesAsync();
 
