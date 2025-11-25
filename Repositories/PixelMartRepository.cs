@@ -2,20 +2,20 @@
 using PixelMart.API.DbContexts;
 using PixelMart.API.Entities;
 using PixelMart.API.Helpers;
+using PixelMart.API.Helpers.ResourceParameters;
 using PixelMart.API.Models.Product;
-using PixelMart.API.ResourceParameters;
 using PixelMart.API.Services;
 
 namespace PixelMart.API.Repositories;
 
 public class PixelMartRepository : IPixelMartRepository
 {
-    private readonly PixelMartDbContext _context;
+    private readonly PixelMartDbContext _dbContext;
     private readonly IPropertyMappingService _propertyMappingService;
 
     public PixelMartRepository(PixelMartDbContext context, IPropertyMappingService propertyMappingService)
     {
-        _context = context ?? throw new ArgumentNullException(nameof(context));
+        _dbContext = context ?? throw new ArgumentNullException(nameof(context));
         _propertyMappingService = propertyMappingService ??
             throw new ArgumentNullException(nameof(propertyMappingService));
     }
@@ -34,10 +34,10 @@ public class PixelMartRepository : IPixelMartRepository
             throw new ArgumentNullException(nameof(productId));
         }
 
-        return await _context.Products
+        return await _dbContext.Products
             .Where(p => p.Id == productId && p.CategoryId == categoryId)
             .AsNoTracking()
-            .FirstOrDefaultAsync() ?? null;
+            .FirstOrDefaultAsync();
     }
 
     public async Task<IEnumerable<Product>> GetProductsAsync(Guid categoryId)
@@ -47,7 +47,7 @@ public class PixelMartRepository : IPixelMartRepository
             throw new ArgumentNullException(nameof(categoryId));
         }
 
-        return await _context.Products
+        return await _dbContext.Products
             .Where(p => p.CategoryId == categoryId)
             .OrderBy(p => p.Name)
             .AsNoTracking()
@@ -64,23 +64,23 @@ public class PixelMartRepository : IPixelMartRepository
         ArgumentNullException.ThrowIfNull(product);
 
         product.CategoryId = categoryId;
-        await _context.Products.AddAsync(product);
+        await _dbContext.Products.AddAsync(product);
     }
 
     public async Task UpdateProductAsync(Product product)
     {
         ArgumentNullException.ThrowIfNull(product);
 
-        _context.Products.Update(product);
-        await _context.SaveChangesAsync();
+        _dbContext.Products.Update(product);
+        await _dbContext.SaveChangesAsync();
     }
 
     public async Task DeleteProductAsync(Product product)
     {
         ArgumentNullException.ThrowIfNull(product);
 
-        _context.Products.Remove(product);
-        await _context.SaveChangesAsync();
+        _dbContext.Products.Remove(product);
+        await _dbContext.SaveChangesAsync();
     }
 
     public async Task<PagedList<Product>> GetProductsAsync(
@@ -92,7 +92,9 @@ public class PixelMartRepository : IPixelMartRepository
             throw new ArgumentNullException(nameof(productsResourceParameters));
         }
 
-        var productsCollection = _context.Products as IQueryable<Product>;
+        var productsCollection = _dbContext.Products
+            .Where(p => p.CategoryId == categoryId)
+            .AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(productsResourceParameters.SearchQuery))
         {
@@ -122,12 +124,31 @@ public class PixelMartRepository : IPixelMartRepository
             throw new ArgumentException("Product ID cannot be empty.", nameof(productId));
         }
 
-        return await _context.Products.AsNoTracking().AnyAsync(p => p.Id == productId);
+        return await _dbContext.Products.AsNoTracking().AnyAsync(p => p.Id == productId);
     }
 
     #endregion
 
     #region Category
+
+    public async Task<IEnumerable<Category>> GetCategoriesAsync()
+    {
+        // return await _context.Categories.Include(c => c.Products).ToListAsync(); // include product details if needed
+        return await _dbContext.Categories.AsNoTracking().ToListAsync();
+    }
+
+    public async Task<Category?> GetCategoryAsync(Guid categoryId)
+    {
+        if (categoryId == Guid.Empty)
+        {
+            throw new ArgumentException("Category ID cannot be empty.", nameof(categoryId));
+        }
+
+        return await _dbContext.Categories
+            .Include(c => c.Products)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(c => c.Id == categoryId);
+    }
 
     public async Task AddCategoryAsync(Category category)
     {
@@ -143,7 +164,7 @@ public class PixelMartRepository : IPixelMartRepository
             }
         }
 
-        await _context.Categories.AddAsync(category);
+        await _dbContext.Categories.AddAsync(category);
     }
 
     public async Task<bool> CategoryExistsAsync(Guid categoryId)
@@ -153,41 +174,23 @@ public class PixelMartRepository : IPixelMartRepository
             throw new ArgumentException("Category ID cannot be empty.", nameof(categoryId));
         }
 
-        return await _context.Categories.AsNoTracking().AnyAsync(c => c.Id == categoryId);
+        return await _dbContext.Categories.AsNoTracking().AnyAsync(c => c.Id == categoryId);
     }
 
     public async Task DeleteCategoryAsync(Category category)
     {
         ArgumentNullException.ThrowIfNull(category);
 
-        _context.Categories.Remove(category);
-        await _context.SaveChangesAsync();
-    }
-
-    public async Task<IEnumerable<Category>> GetCategoriesAsync()
-    {
-        // return await _context.Categories.Include(c => c.Products).ToListAsync(); // include product details if needed
-        return await _context.Categories.AsNoTracking().ToListAsync();
-    }
-
-    public async Task<Category?> GetCategoryAsync(Guid categoryId)
-    {
-        if (categoryId == Guid.Empty)
-        {
-            throw new ArgumentException("Category ID cannot be empty.", nameof(categoryId));
-        }
-
-        return await _context.Categories
-            .Include(c => c.Products)
-            .FirstOrDefaultAsync(c => c.Id == categoryId) ?? null;
+        _dbContext.Categories.Remove(category);
+        await _dbContext.SaveChangesAsync();
     }
 
     public async Task UpdateCategoryAsync(Category category)
     {
         ArgumentNullException.ThrowIfNull(category);
 
-        _context.Categories.Update(category);
-        await _context.SaveChangesAsync();
+        _dbContext.Categories.Update(category);
+        await _dbContext.SaveChangesAsync();
     }
 
     #endregion
@@ -196,17 +199,19 @@ public class PixelMartRepository : IPixelMartRepository
 
     public async Task<IEnumerable<Stock>> GetAllItemStocksAsync()
     {
-        return await _context.Stocks.AsNoTracking().ToListAsync();
+        return await _dbContext.Stocks.AsNoTracking().ToListAsync();
     }
 
-    public async Task<Stock> GetItemStockAsync(Guid productId)
+    public async Task<Stock?> GetItemStockAsync(Guid productId)
     {
         if (productId == Guid.Empty)
         {
             throw new ArgumentException("Product ID cannot be empty.", nameof(productId));
         }
 
-        return await _context.Stocks.AsNoTracking().FirstAsync(s => s.ProductId == productId);
+        return await _dbContext.Stocks
+            .AsNoTracking()
+            .FirstOrDefaultAsync(s => s.ProductId == productId);
     }
 
     public async Task AddItemStockAsync(Guid productId, Stock stock)
@@ -219,7 +224,7 @@ public class PixelMartRepository : IPixelMartRepository
         ArgumentNullException.ThrowIfNull(stock);
 
         stock.ProductId = productId;
-        await _context.Stocks.AddAsync(stock);
+        await _dbContext.Stocks.AddAsync(stock);
     }
 
     public async Task UpdateItemStockAsync(Guid productId, Stock itemStock)
@@ -232,8 +237,9 @@ public class PixelMartRepository : IPixelMartRepository
         ArgumentNullException.ThrowIfNull(itemStock);
 
         itemStock.ProductId = productId;
-        _context.Stocks.Update(itemStock);
-        await _context.SaveChangesAsync();
+
+        _dbContext.Stocks.Update(itemStock);
+        await _dbContext.SaveChangesAsync();
     }
 
     public async Task<bool> StockExistsAsync(Guid productId)
@@ -243,7 +249,7 @@ public class PixelMartRepository : IPixelMartRepository
             throw new ArgumentException("Product ID cannot be empty.", nameof(productId));
         }
 
-        return await _context.Stocks.AsNoTracking().AnyAsync(s => s.ProductId == productId);
+        return await _dbContext.Stocks.AsNoTracking().AnyAsync(s => s.ProductId == productId);
     }
 
     #endregion
@@ -252,7 +258,10 @@ public class PixelMartRepository : IPixelMartRepository
 
     public async Task<IEnumerable<ShoppingCart>> GetAllCartDetailsAsync()
     {
-        return await _context.ShoppingCarts.Include(sc => sc.Items).AsNoTracking().ToListAsync();
+        return await _dbContext.ShoppingCarts
+            .Include(sc => sc.Items)
+            .AsNoTracking()
+            .ToListAsync();
     }
 
     public async Task<ShoppingCart?> GetCartDetailsForUserAsync(Guid userId)
@@ -260,10 +269,10 @@ public class PixelMartRepository : IPixelMartRepository
         if (userId == Guid.Empty)
             throw new ArgumentException("User ID cannot be empty.", nameof(userId));
 
-        return await _context.ShoppingCarts
+        return await _dbContext.ShoppingCarts
             .Include(sc => sc.Items)
             .AsNoTracking()
-            .FirstOrDefaultAsync(sc => sc.UserId == userId.ToString()) ?? null;
+            .FirstOrDefaultAsync(sc => sc.UserId == userId.ToString());
     }
 
     public async Task AddShoppingCartAsync(Guid userId, ShoppingCart shoppingCart)
@@ -274,7 +283,7 @@ public class PixelMartRepository : IPixelMartRepository
         ArgumentNullException.ThrowIfNull(shoppingCart);
 
         shoppingCart.UserId = userId.ToString();
-        await _context.ShoppingCarts.AddAsync(shoppingCart);
+        await _dbContext.ShoppingCarts.AddAsync(shoppingCart);
     }
 
     public async Task UpdateShoppingCartAsync(Guid userId, ShoppingCart updatedShoppingCart)
@@ -284,16 +293,16 @@ public class PixelMartRepository : IPixelMartRepository
 
         ArgumentNullException.ThrowIfNull(updatedShoppingCart);
 
-        var existingCart = await _context.ShoppingCarts
+        var shoppingCart = await _dbContext.ShoppingCarts
             .Include(c => c.Items)
             .FirstOrDefaultAsync(c => c.UserId == userId.ToString());
 
-        if (existingCart == null)
+        if (shoppingCart == null)
             throw new InvalidOperationException("Shopping cart not found.");
 
         foreach (var updatedItem in updatedShoppingCart.Items)
         {
-            var existingItem = existingCart.Items
+            var existingItem = shoppingCart.Items
                 .FirstOrDefault(i => i.ProductId == updatedItem.ProductId);
 
             if (existingItem != null)
@@ -302,24 +311,25 @@ public class PixelMartRepository : IPixelMartRepository
             }
             else
             {
-                existingCart.Items.Add(new CartItem
+                shoppingCart.Items.Add(new CartItem
                 {
                     ProductId = updatedItem.ProductId,
                     Quantity = updatedItem.Quantity,
-                    ShoppingCartId = existingCart.Id
+                    ShoppingCartId = shoppingCart.Id
                 });
             }
         }
 
-        await _context.SaveChangesAsync();
+        _dbContext.ShoppingCarts.Update(shoppingCart);
+        await _dbContext.SaveChangesAsync();
     }
 
     public async Task DeleteShoppingCartAsync(ShoppingCart cart)
     {
         ArgumentNullException.ThrowIfNull(cart);
 
-        _context.ShoppingCarts.Remove(cart);
-        await _context.SaveChangesAsync();
+        _dbContext.ShoppingCarts.Remove(cart);
+        await _dbContext.SaveChangesAsync();
     }
 
     #endregion
@@ -328,7 +338,7 @@ public class PixelMartRepository : IPixelMartRepository
 
     public async Task<IEnumerable<Order>> GetAllOrdersAsync()
     {
-        var orders = await _context.Orders
+        var orders = await _dbContext.Orders
             .Include(sc => sc.Items)
             .AsNoTracking()
             .ToListAsync();
@@ -338,7 +348,7 @@ public class PixelMartRepository : IPixelMartRepository
 
     public async Task<IEnumerable<Order>> GetOrdersForUserAsync(Guid userId)
     {
-        var userOrders = await _context.Orders
+        var userOrders = await _dbContext.Orders
             .Include(sc => sc.Items)
             .Where(o => o.UserId == userId.ToString())
             .AsNoTracking()
@@ -355,12 +365,12 @@ public class PixelMartRepository : IPixelMartRepository
         if (orderId == Guid.Empty)
             throw new ArgumentException("Order ID cannot be empty.", nameof(orderId));
 
-        var order = _context.Orders
+        var order = _dbContext.Orders
             .Include(o => o.Items)
             .AsNoTracking()
             .FirstOrDefaultAsync(o => o.UserId == userId.ToString() && o.Id == orderId);
 
-        return order ?? throw new InvalidOperationException("Order not found for user.");
+        return order == null ? throw new InvalidOperationException("Order not found for user.") : order!;
     }
 
     public async Task CreateOrderAsync(Guid userId, Order order)
@@ -371,7 +381,7 @@ public class PixelMartRepository : IPixelMartRepository
         ArgumentNullException.ThrowIfNull(order);
 
         order.UserId = userId.ToString();
-        await _context.Orders.AddAsync(order);
+        await _dbContext.Orders.AddAsync(order);
     }
 
     public async Task UpdateOrderAsync(Guid userId, Guid orderId, Order orderUpdated)
@@ -384,7 +394,7 @@ public class PixelMartRepository : IPixelMartRepository
 
         ArgumentNullException.ThrowIfNull(orderUpdated);
 
-        var userOrder = await _context.Orders
+        var userOrder = await _dbContext.Orders
             .Include(o => o.Items)
             .FirstOrDefaultAsync(o => o.UserId == userId.ToString() && o.Id == orderId);
 
@@ -432,15 +442,16 @@ public class PixelMartRepository : IPixelMartRepository
             userOrder.Items.Remove(item);
         }
 
-        await _context.SaveChangesAsync();
+        _dbContext.Orders.Update(userOrder);
+        await _dbContext.SaveChangesAsync();
     }
 
     public async Task CancelOrderAsync(Order order)
     {
         ArgumentNullException.ThrowIfNull(order);
 
-        _context.Orders.Remove(order);
-        await _context.SaveChangesAsync();
+        _dbContext.Orders.Remove(order);
+        await _dbContext.SaveChangesAsync();
     }
 
     #endregion
@@ -449,7 +460,7 @@ public class PixelMartRepository : IPixelMartRepository
 
     public async Task<bool> SaveAsync()
     {
-        return await _context.SaveChangesAsync() >= 0; // SaveChangesAsync result contain no entries written to the DB
+        return await _dbContext.SaveChangesAsync() >= 0; // SaveChangesAsync result contain no entries written to the DB
     }
 
     #endregion

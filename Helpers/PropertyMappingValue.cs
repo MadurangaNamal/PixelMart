@@ -7,8 +7,7 @@ public class PropertyMappingValue
 
     public PropertyMappingValue(IEnumerable<string> destinationProperties, bool revert = false)
     {
-        DestinationProperties = destinationProperties
-            ?? throw new ArgumentNullException(nameof(destinationProperties));
+        DestinationProperties = destinationProperties ?? throw new ArgumentNullException(nameof(destinationProperties));
         Revert = revert;
     }
 }

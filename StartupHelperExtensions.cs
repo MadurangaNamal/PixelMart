@@ -62,11 +62,6 @@ internal static class StartupHelperExtensions
         builder.Services.AddMemoryCache();
         builder.Services.AddScoped<ICacheService, CacheService>();
 
-        // Add Identity
-        builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
-            .AddEntityFrameworkStores<PixelMartDbContext>()
-            .AddDefaultTokenProviders();
-
         // Add Rate Limiter
         builder.Services.AddRateLimiter(options =>
         {
@@ -86,6 +81,11 @@ internal static class StartupHelperExtensions
 
             options.RejectionStatusCode = 429;
         });
+
+        // Add Identity
+        builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+            .AddEntityFrameworkStores<PixelMartDbContext>()
+            .AddDefaultTokenProviders();
 
         // Add Authentication
         builder.Services.AddAuthentication(options =>

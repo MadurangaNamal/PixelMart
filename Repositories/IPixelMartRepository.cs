@@ -1,6 +1,6 @@
 ﻿using PixelMart.API.Entities;
 using PixelMart.API.Helpers;
-using PixelMart.API.ResourceParameters;
+using PixelMart.API.Helpers.ResourceParameters;
 
 namespace PixelMart.API.Repositories;
 
@@ -29,7 +29,7 @@ public interface IPixelMartRepository
 
     #region Stock
     Task<IEnumerable<Stock>> GetAllItemStocksAsync();
-    Task<Stock> GetItemStockAsync(Guid productId);
+    Task<Stock?> GetItemStockAsync(Guid productId);
     Task AddItemStockAsync(Guid productId, Stock stock);
     Task UpdateItemStockAsync(Guid productId, Stock itemStock);
     Task<bool> StockExistsAsync(Guid productId);

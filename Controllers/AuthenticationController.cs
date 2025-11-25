@@ -18,21 +18,18 @@ namespace PixelMart.API.Controllers;
 public class AuthenticationController : ControllerBase
 {
     private readonly UserManager<ApplicationUser> _userManager;
-    private readonly RoleManager<IdentityRole> _roleManager;
     private readonly PixelMartDbContext _context;
     private readonly IConfiguration _configuration;
     private readonly TokenValidationParameters _tokenValidationParameters;
     private readonly RequestLogHelper _requestLogHelper;
 
     public AuthenticationController(UserManager<ApplicationUser> userManager,
-           RoleManager<IdentityRole> roleManager,
            PixelMartDbContext context,
            IConfiguration configuration,
            TokenValidationParameters tokenValidationParameters,
            RequestLogHelper requestLogHelper)
     {
         _userManager = userManager;
-        _roleManager = roleManager;
         _context = context;
         _configuration = configuration;
         _tokenValidationParameters = tokenValidationParameters;
@@ -116,6 +113,7 @@ public class AuthenticationController : ControllerBase
         }
 
         _requestLogHelper.LogError(null!, "UNAUTHORIZED LOGIN ATTEMPT");
+
         return Unauthorized();
     }
 
@@ -189,7 +187,7 @@ public class AuthenticationController : ControllerBase
         var token = new JwtSecurityToken(
             issuer: _configuration["JWT:Issuer"],
             audience: _configuration["JWT:Audience"],
-            expires: DateTime.UtcNow.AddMinutes(30),
+            expires: DateTime.UtcNow.AddMinutes(Convert.ToDouble(_configuration["JWT:ExpiryInMinutes"])),
             claims: authClaims,
             signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256));
 
@@ -203,6 +201,7 @@ public class AuthenticationController : ControllerBase
                 RefreshToken = rToken.Token,
                 ExpiresAt = token.ValidTo
             };
+
             return rTokenResponse;
         }
 
@@ -212,7 +211,7 @@ public class AuthenticationController : ControllerBase
             IsRevoked = false,
             UserId = user.Id,
             DateAdded = DateTime.UtcNow,
-            DateExpire = DateTime.UtcNow.AddMonths(6),
+            DateExpire = DateTime.UtcNow.AddMonths(3),
             Token = Guid.NewGuid().ToString() + "-" + Guid.NewGuid().ToString()
         };
 

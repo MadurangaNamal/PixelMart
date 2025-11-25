@@ -1,4 +1,4 @@
-﻿namespace PixelMart.API.ResourceParameters;
+﻿namespace PixelMart.API.Helpers.ResourceParameters;
 
 /// <summary>
 /// Encapsulates resource parameters for querying and paginating product data.
