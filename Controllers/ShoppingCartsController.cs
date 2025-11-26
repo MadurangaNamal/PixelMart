@@ -23,7 +23,7 @@ public class ShoppingCartsController : ControllerBase
     {
         _pixelMartRepository = pixelMartRepository ?? throw new ArgumentNullException(nameof(pixelMartRepository));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-        _requestLogHelper = requestLogHelper;
+        _requestLogHelper = requestLogHelper ?? throw new ArgumentNullException(nameof(requestLogHelper));
     }
 
     [Authorize(Roles = $"{UserRoles.Admin}, {UserRoles.User}")]
@@ -33,8 +33,9 @@ public class ShoppingCartsController : ControllerBase
         _requestLogHelper.LogInfo("GET /api/shopping-carts CALLED TO RETRIEVE ALL SHOPPING CARTS");
 
         var shoppingCarts = await _pixelMartRepository.GetAllCartDetailsAsync();
+        var shoppingCartsResponse = _mapper.Map<IEnumerable<ShoppingCartDto>>(shoppingCarts);
 
-        return Ok(_mapper.Map<IEnumerable<ShoppingCartDto>>(shoppingCarts));
+        return Ok(shoppingCartsResponse);
     }
 
     [HttpGet("user-cart", Name = "GetCartForUser")]
@@ -42,14 +43,15 @@ public class ShoppingCartsController : ControllerBase
     {
         _requestLogHelper.LogInfo("GET /api/shopping-carts/user-cart CALLED TO RETRIEVE SHOPPING CART DETAILS FOR USER");
 
-        var userId = getLoggedUserId();
+        var userId = getCurrentUserId();
 
         if (userId == Guid.Empty)
             return BadRequest("Invalid user ID");
 
         var shoppingCart = await _pixelMartRepository.GetCartDetailsForUserAsync(userId);
+        var shoppingCartResponse = _mapper.Map<ShoppingCartDto>(shoppingCart);
 
-        return Ok(_mapper.Map<ShoppingCartDto>(shoppingCart));
+        return Ok(shoppingCartResponse);
     }
 
     [HttpPost("user-cart")]
@@ -57,7 +59,7 @@ public class ShoppingCartsController : ControllerBase
     {
         _requestLogHelper.LogInfo($"POST /api/shopping-carts/user-cart CALLED TO ADD SHOPPING CART FOR A USER");
 
-        var userId = getLoggedUserId();
+        var userId = getCurrentUserId();
 
         if (userId == Guid.Empty)
             return BadRequest("Invalid user ID");
@@ -77,7 +79,7 @@ public class ShoppingCartsController : ControllerBase
     {
         _requestLogHelper.LogInfo($"PUT /api/shopping-carts/user-cart CALLED TO UPDTAE THE SHOPPING CART FOR A USER");
 
-        var userId = getLoggedUserId();
+        var userId = getCurrentUserId();
 
         if (userId == Guid.Empty)
             return BadRequest("Invalid user ID");
@@ -90,6 +92,7 @@ public class ShoppingCartsController : ControllerBase
 
             await _pixelMartRepository.AddShoppingCartAsync(userId, CartToAdd);
             await _pixelMartRepository.SaveAsync();
+
             return CreatedAtRoute("GetCartForUser", CartToAdd);
         }
 
@@ -104,7 +107,7 @@ public class ShoppingCartsController : ControllerBase
     {
         _requestLogHelper.LogInfo($"PATCH /api/shopping-carts/user-cart CALLED TO PARTIALLY UPDTAE THE SHOPPING CART FOR A USER");
 
-        var userId = getLoggedUserId();
+        var userId = getCurrentUserId();
 
         if (userId == Guid.Empty)
             return BadRequest("Invalid user ID");
@@ -114,12 +117,11 @@ public class ShoppingCartsController : ControllerBase
         if (cartFromRepo == null)
         {
             var shoppingCartDto = new ShoppingCartUpdateDto();
+            
             patchDocument.ApplyTo(shoppingCartDto, ModelState);
 
             if (!TryValidateModel(shoppingCartDto))
-            {
                 return ValidationProblem(ModelState);
-            }
 
             var cartToAdd = _mapper.Map<ShoppingCart>(shoppingCartDto);
 
@@ -127,17 +129,16 @@ public class ShoppingCartsController : ControllerBase
             await _pixelMartRepository.SaveAsync();
 
             var cartToReturn = _mapper.Map<ShoppingCartDto>(cartToAdd);
-            return CreatedAtRoute("GetCartForUser", cartToReturn);
 
+            return CreatedAtRoute("GetCartForUser", cartToReturn);
         }
 
         var shoppingCartToPatch = _mapper.Map<ShoppingCartUpdateDto>(cartFromRepo);
+
         patchDocument.ApplyTo(shoppingCartToPatch, ModelState);
 
         if (!TryValidateModel(shoppingCartToPatch))
-        {
             return ValidationProblem(ModelState);
-        }
 
         _mapper.Map(shoppingCartToPatch, cartFromRepo);
         await _pixelMartRepository.UpdateShoppingCartAsync(userId, cartFromRepo);
@@ -150,7 +151,7 @@ public class ShoppingCartsController : ControllerBase
     {
         _requestLogHelper.LogInfo($"DELETE /api/shopping-carts/user-cart CALLED TO DELETE SHOPPING CART FOR USER");
 
-        var userId = getLoggedUserId();
+        var userId = getCurrentUserId();
 
         if (userId == Guid.Empty)
             return BadRequest("Invalid user ID");
@@ -161,12 +162,13 @@ public class ShoppingCartsController : ControllerBase
             return NotFound();
 
         await _pixelMartRepository.DeleteShoppingCartAsync(cartForUserFromRepo);
+
         return NoContent();
     }
 
-    private Guid getLoggedUserId()
+    private Guid getCurrentUserId()
     {
-        var userId = _requestLogHelper.GetUserID();
+        var userId = _requestLogHelper.GetUserId();
 
         if (userId == Guid.Empty)
             _requestLogHelper.LogError(null!, "Invalid user ID");

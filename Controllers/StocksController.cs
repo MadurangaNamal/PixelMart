@@ -32,8 +32,9 @@ public class StocksController : ControllerBase
         _requestLogHelper.LogInfo("GET /api/item-stocks CALLED TO RETRIEVE ALL STOCKS");
 
         var stocks = await _pixelMartRepository.GetAllItemStocksAsync();
+        var stocksResponse = _mapper.Map<IEnumerable<StockItemDto>>(stocks);
 
-        return Ok(_mapper.Map<IEnumerable<StockItemDto>>(stocks));
+        return Ok(stocksResponse);
     }
 
     [HttpGet("{productId}", Name = "GetStockForProduct")]
@@ -42,12 +43,12 @@ public class StocksController : ControllerBase
         _requestLogHelper.LogInfo($"GET /api/item-stocks/{productId} CALLED TO RETRIEVE STOCKS FOR A PRODUCT");
 
         if (!await _pixelMartRepository.StockExistsAsync(productId))
-        {
             return NotFound();
-        }
 
         var productStocksFromRepo = await _pixelMartRepository.GetItemStockAsync(productId);
-        return Ok(_mapper.Map<StockItemDto>(productStocksFromRepo));
+        var stockResponse = _mapper.Map<StockItemDto>(productStocksFromRepo);
+
+        return Ok(stockResponse);
     }
 
     [Authorize(Roles = $"{UserRoles.Admin}, {UserRoles.User}")]
@@ -57,11 +58,10 @@ public class StocksController : ControllerBase
         _requestLogHelper.LogInfo($"POST /api/item-stocks/{productId} CALLED TO ADD STOCKS FOR A PRODUCT");
 
         if (!await _pixelMartRepository.ProductExistsAsync(productId))
-        {
             return NotFound();
-        }
 
         var stockEntity = _mapper.Map<Stock>(productStock);
+
         await _pixelMartRepository.AddItemStockAsync(productId, stockEntity);
         await _pixelMartRepository.SaveAsync();
 
@@ -77,19 +77,19 @@ public class StocksController : ControllerBase
         _requestLogHelper.LogInfo($"PUT /api/item-stocks/{productId} CALLED TO UPDATE STOCKS FOR A PRODUCT");
 
         if (!await _pixelMartRepository.ProductExistsAsync(productId))
-        {
             return NotFound();
-        }
 
         var productStockFromRepo = await _pixelMartRepository.GetItemStockAsync(productId);
 
         if (productStockFromRepo is null)
         {
             var stockToAdd = _mapper.Map<Stock>(productStock);
+
             await _pixelMartRepository.AddItemStockAsync(productId, stockToAdd);
             await _pixelMartRepository.SaveAsync();
 
             var stockItemToReturn = _mapper.Map<StockItemDto>(stockToAdd);
+
             return CreatedAtRoute("GetStockForProduct", new { productId = stockItemToReturn.ProductId }, stockItemToReturn);
         }
 

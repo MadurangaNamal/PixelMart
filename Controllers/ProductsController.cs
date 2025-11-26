@@ -47,15 +47,11 @@ public class ProductsController : ControllerBase
         _requestLogHelper.LogInfo($"GET /api/categories/{categoryId}/products CALLED TO RETRIEVE PRODUCTS FOR A CATEGORY");
 
         if (!await _pixelMartRepository.CategoryExistsAsync(categoryId))
-        {
             return NotFound();
-        }
 
         // Validate the orderBy parameter
         if (!_propertyMappingService.ValidMappingExistsFor<ProductDto, Product>(productsResourceParameters.OrderBy))
-        {
             return BadRequest();
-        }
 
         var productsFromRepo = await _pixelMartRepository.GetProductsAsync(categoryId, productsResourceParameters);
 
@@ -64,7 +60,9 @@ public class ProductsController : ControllerBase
             product.Stock = _pixelMartRepository.GetItemStockAsync(product.Id).Result;
         }
 
-        return Ok(_mapper.Map<IEnumerable<ProductDto>>(productsFromRepo));
+        var productsResponse = _mapper.Map<IEnumerable<ProductDto>>(productsFromRepo);
+
+        return Ok(productsResponse);
     }
 
     [HttpGet("{productId}", Name = "GetProductForCategory")]
@@ -77,6 +75,7 @@ public class ProductsController : ControllerBase
         if (_cacheService.GetProductDto(cacheKey) is { } cachedProductDto)
         {
             _requestLogHelper.LogInfo($"Cache HIT for Product {productId} in Category {categoryId}");
+
             return Ok(cachedProductDto);
         }
 
@@ -89,6 +88,7 @@ public class ProductsController : ControllerBase
             return NotFound();
 
         var productFromRepo = productTask.Result;
+
         if (productFromRepo == null)
             return NotFound();
 
@@ -108,11 +108,10 @@ public class ProductsController : ControllerBase
         _requestLogHelper.LogInfo($"POST /api/categories/{categoryId}/products CALLED TO ADD A NEW PRODUCT");
 
         if (!await _pixelMartRepository.CategoryExistsAsync(categoryId))
-        {
             return NotFound();
-        }
 
         var productEntity = _mapper.Map<Product>(product);
+
         await _pixelMartRepository.AddProductAsync(categoryId, productEntity);
         await _pixelMartRepository.SaveAsync();
 
@@ -121,16 +120,14 @@ public class ProductsController : ControllerBase
         return CreatedAtRoute("GetProductForCategory", new { categoryId, productId = productToReturn.Id }, productToReturn);
     }
 
-    [Authorize(Roles = UserRoles.Admin)]
+    [Authorize(Roles = $"{UserRoles.Admin}, {UserRoles.User}")]
     [HttpPut("{productId}")]
     public async Task<IActionResult> UpdateProductForCategory(Guid categoryId, Guid productId, ProductForUpdateDto product)
     {
         _requestLogHelper.LogInfo($"PUT /api/categories/{categoryId}/products/{productId} CALLED TO UPDATE A PRODUCT");
 
         if (!await _pixelMartRepository.CategoryExistsAsync(categoryId))
-        {
             return NotFound();
-        }
 
         var productFromRepo = await _pixelMartRepository.GetproductAsync(categoryId, productId);
 
@@ -138,6 +135,7 @@ public class ProductsController : ControllerBase
         {
             var productToAdd = _mapper.Map<Product>(product);
             productToAdd.Id = productId;
+
             await _pixelMartRepository.AddProductAsync(categoryId, productToAdd);
             await _pixelMartRepository.SaveAsync();
 
@@ -146,7 +144,8 @@ public class ProductsController : ControllerBase
             return CreatedAtRoute("GetProductForCategory", new { categoryId, productId = productToReturn.Id }, productToReturn);
         }
 
-        _mapper.Map(product, productFromRepo); // apply the updated field values to the entity
+        _mapper.Map(product, productFromRepo); // apply new values
+
         await _pixelMartRepository.UpdateProductAsync(productFromRepo);
 
         return NoContent();
@@ -162,21 +161,18 @@ public class ProductsController : ControllerBase
         _requestLogHelper.LogInfo($"PATCH /api/categories/{categoryId}/products/{productId} CALLED TO PARTIALLY UPDATE A PRODUCT");
 
         if (!await _pixelMartRepository.CategoryExistsAsync(categoryId))
-        {
             return NotFound();
-        }
 
         var productFromRepo = await _pixelMartRepository.GetproductAsync(categoryId, productId);
 
         if (productFromRepo == null)
         {
             var productDto = new ProductForUpdateDto();
+
             patchDocument.ApplyTo(productDto, ModelState);
 
             if (!TryValidateModel(productDto))
-            {
                 return ValidationProblem(ModelState);
-            }
 
             var productToAdd = _mapper.Map<Product>(productDto);
             productToAdd.Id = productId;
@@ -194,9 +190,7 @@ public class ProductsController : ControllerBase
         patchDocument.ApplyTo(productToPatch, ModelState);
 
         if (!TryValidateModel(productToPatch))
-        {
             return ValidationProblem(ModelState);
-        }
 
         _mapper.Map(productToPatch, productFromRepo);
 
@@ -220,6 +214,7 @@ public class ProductsController : ControllerBase
             return NotFound();
 
         await _pixelMartRepository.DeleteProductAsync(productFromRepo);
+
         return NoContent();
     }
 

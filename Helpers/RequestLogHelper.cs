@@ -31,7 +31,7 @@ public class RequestLogHelper
         _logger.LogError(ex, "[{Time}] User: {User} - {Message}", timestamp, username, message);
     }
 
-    public Guid GetUserID()
+    public Guid GetUserId()
     {
         var context = _httpContextAccessor.HttpContext;
         var userIdClaim = context?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;

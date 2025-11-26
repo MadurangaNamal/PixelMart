@@ -31,8 +31,9 @@ public class CategoriesController : ControllerBase
         _requestLogHelper.LogInfo("GET /api/categories CALLED TO RETRIEVE ALL PRODUCT CATEGORIES");
 
         var categories = await _pixelMartRepository.GetCategoriesAsync();
+        var categoriesResponse = _mapper.Map<IEnumerable<CategoryDto>>(categories);
 
-        return Ok(_mapper.Map<IEnumerable<CategoryDto>>(categories));
+        return Ok(categoriesResponse);
     }
 
     [HttpGet("{categoryId}", Name = "GetCategory")]
@@ -41,18 +42,16 @@ public class CategoriesController : ControllerBase
         _requestLogHelper.LogInfo($"GET /api/categories/{categoryId} CALLED TO RETRIEVE SINGLE CATEGORY");
 
         if (!await _pixelMartRepository.CategoryExistsAsync(categoryId))
-        {
             return NotFound();
-        }
 
         var categoryFromRepo = await _pixelMartRepository.GetCategoryAsync(categoryId);
 
         if (categoryFromRepo == null)
-        {
             return NotFound();
-        }
 
-        return Ok(_mapper.Map<CategoryDto>(categoryFromRepo));
+        var categoryResponse = _mapper.Map<CategoryDto>(categoryFromRepo);
+
+        return Ok(categoryResponse);
     }
 
     [Authorize(Roles = $"{UserRoles.Admin}, {UserRoles.User}")]
@@ -66,8 +65,8 @@ public class CategoriesController : ControllerBase
         await _pixelMartRepository.SaveAsync();
 
         var categoryToReturn = _mapper.Map<CategoryDto>(categoryDto);
-        return CreatedAtRoute("GetCategory", new { categoryId = categoryToReturn.Id }, categoryToReturn);
 
+        return CreatedAtRoute("GetCategory", new { categoryId = categoryToReturn.Id }, categoryToReturn);
     }
 
     [Authorize(Roles = UserRoles.Admin)]
@@ -77,13 +76,10 @@ public class CategoriesController : ControllerBase
         _requestLogHelper.LogInfo($"PUT /api/categories/{categoryId} CALLED TO UPDATE A CATEGORY");
 
         if (!await _pixelMartRepository.CategoryExistsAsync(categoryId))
-        {
             return NotFound();
-        }
 
         var categoryFromRepo = await _pixelMartRepository.GetCategoryAsync(categoryId);
-
-        _mapper.Map(category, categoryFromRepo); // apply the updated field values 
+        _mapper.Map(category, categoryFromRepo); // apply new values 
 
         await _pixelMartRepository.UpdateCategoryAsync(categoryFromRepo!);
 
@@ -97,16 +93,12 @@ public class CategoriesController : ControllerBase
         _requestLogHelper.LogInfo($"DELETE /api/categories/{categoryId} CALLED TO DELETE A CATEGORY");
 
         if (!await _pixelMartRepository.CategoryExistsAsync(categoryId))
-        {
             return NotFound();
-        }
 
         var categoryFromRepo = await _pixelMartRepository.GetCategoryAsync(categoryId);
 
         if (categoryFromRepo == null)
-        {
             return NotFound();
-        }
 
         await _pixelMartRepository.DeleteCategoryAsync(categoryFromRepo);
 
