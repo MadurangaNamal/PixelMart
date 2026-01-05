@@ -16,12 +16,14 @@ namespace PixelMart.API.Controllers;
 public class ShoppingCartsController : ControllerBase
 {
     private readonly IPixelMartRepository _pixelMartRepository;
+    private readonly IShoppingCartsRepository _shoppingCartsRepository;
     private readonly IMapper _mapper;
     private readonly RequestLogHelper _requestLogHelper;
 
-    public ShoppingCartsController(IPixelMartRepository pixelMartRepository, IMapper mapper, RequestLogHelper requestLogHelper)
+    public ShoppingCartsController(IPixelMartRepository pixelMartRepository, IShoppingCartsRepository shoppingCartsRepository, IMapper mapper, RequestLogHelper requestLogHelper)
     {
         _pixelMartRepository = pixelMartRepository ?? throw new ArgumentNullException(nameof(pixelMartRepository));
+        _shoppingCartsRepository = shoppingCartsRepository ?? throw new ArgumentNullException(nameof(shoppingCartsRepository));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _requestLogHelper = requestLogHelper ?? throw new ArgumentNullException(nameof(requestLogHelper));
     }
@@ -32,7 +34,7 @@ public class ShoppingCartsController : ControllerBase
     {
         _requestLogHelper.LogInfo("GET /api/shopping-carts CALLED TO RETRIEVE ALL SHOPPING CARTS");
 
-        var shoppingCarts = await _pixelMartRepository.GetAllCartDetailsAsync();
+        var shoppingCarts = await _shoppingCartsRepository.GetAllCartDetailsAsync();
         var shoppingCartsResponse = _mapper.Map<IEnumerable<ShoppingCartDto>>(shoppingCarts);
 
         return Ok(shoppingCartsResponse);
@@ -48,7 +50,7 @@ public class ShoppingCartsController : ControllerBase
         if (userId == Guid.Empty)
             return BadRequest("Invalid user ID");
 
-        var shoppingCart = await _pixelMartRepository.GetCartDetailsForUserAsync(userId);
+        var shoppingCart = await _shoppingCartsRepository.GetCartDetailsForUserAsync(userId);
         var shoppingCartResponse = _mapper.Map<ShoppingCartDto>(shoppingCart);
 
         return Ok(shoppingCartResponse);
@@ -66,7 +68,7 @@ public class ShoppingCartsController : ControllerBase
 
         var cartEntity = _mapper.Map<ShoppingCart>(shoppingCartCreationDto);
 
-        await _pixelMartRepository.AddShoppingCartAsync(userId, cartEntity);
+        await _shoppingCartsRepository.AddShoppingCartAsync(userId, cartEntity);
         await _pixelMartRepository.SaveAsync();
 
         var cartToReturn = _mapper.Map<ShoppingCartDto>(cartEntity);
@@ -84,20 +86,20 @@ public class ShoppingCartsController : ControllerBase
         if (userId == Guid.Empty)
             return BadRequest("Invalid user ID");
 
-        var cartFromRepo = await _pixelMartRepository.GetCartDetailsForUserAsync(userId);
+        var cartFromRepo = await _shoppingCartsRepository.GetCartDetailsForUserAsync(userId);
 
         if (cartFromRepo == null)
         {
             var CartToAdd = _mapper.Map<ShoppingCart>(shoppingCartUpdateDto);
 
-            await _pixelMartRepository.AddShoppingCartAsync(userId, CartToAdd);
+            await _shoppingCartsRepository.AddShoppingCartAsync(userId, CartToAdd);
             await _pixelMartRepository.SaveAsync();
 
             return CreatedAtRoute("GetCartForUser", CartToAdd);
         }
 
         _mapper.Map(shoppingCartUpdateDto, cartFromRepo);
-        await _pixelMartRepository.UpdateShoppingCartAsync(userId, cartFromRepo);
+        await _shoppingCartsRepository.UpdateShoppingCartAsync(userId, cartFromRepo);
 
         return NoContent();
     }
@@ -112,12 +114,12 @@ public class ShoppingCartsController : ControllerBase
         if (userId == Guid.Empty)
             return BadRequest("Invalid user ID");
 
-        var cartFromRepo = await _pixelMartRepository.GetCartDetailsForUserAsync(userId);
+        var cartFromRepo = await _shoppingCartsRepository.GetCartDetailsForUserAsync(userId);
 
         if (cartFromRepo == null)
         {
             var shoppingCartDto = new ShoppingCartUpdateDto();
-            
+
             patchDocument.ApplyTo(shoppingCartDto, ModelState);
 
             if (!TryValidateModel(shoppingCartDto))
@@ -125,7 +127,7 @@ public class ShoppingCartsController : ControllerBase
 
             var cartToAdd = _mapper.Map<ShoppingCart>(shoppingCartDto);
 
-            await _pixelMartRepository.AddShoppingCartAsync(userId, cartToAdd);
+            await _shoppingCartsRepository.AddShoppingCartAsync(userId, cartToAdd);
             await _pixelMartRepository.SaveAsync();
 
             var cartToReturn = _mapper.Map<ShoppingCartDto>(cartToAdd);
@@ -141,7 +143,7 @@ public class ShoppingCartsController : ControllerBase
             return ValidationProblem(ModelState);
 
         _mapper.Map(shoppingCartToPatch, cartFromRepo);
-        await _pixelMartRepository.UpdateShoppingCartAsync(userId, cartFromRepo);
+        await _shoppingCartsRepository.UpdateShoppingCartAsync(userId, cartFromRepo);
 
         return NoContent();
     }
@@ -156,12 +158,12 @@ public class ShoppingCartsController : ControllerBase
         if (userId == Guid.Empty)
             return BadRequest("Invalid user ID");
 
-        var cartForUserFromRepo = await _pixelMartRepository.GetCartDetailsForUserAsync(userId);
+        var cartForUserFromRepo = await _shoppingCartsRepository.GetCartDetailsForUserAsync(userId);
 
         if (cartForUserFromRepo is null)
             return NotFound();
 
-        await _pixelMartRepository.DeleteShoppingCartAsync(cartForUserFromRepo);
+        await _shoppingCartsRepository.DeleteShoppingCartAsync(cartForUserFromRepo);
 
         return NoContent();
     }

@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using PixelMart.API.Entities;
 
-namespace PixelMart.API.DbContexts;
+namespace PixelMart.API.Data;
 
 public class PixelMartDbContext : IdentityDbContext<ApplicationUser>
 {

@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using PixelMart.API.Data;
-using PixelMart.API.DbContexts;
 using PixelMart.API.Entities;
 using PixelMart.API.Helpers;
 using PixelMart.API.Repositories;
@@ -59,6 +58,11 @@ internal static class StartupHelperExtensions
         builder.Services.AddTransient<IPropertyMappingService, PropertyMappingService>();
         builder.Services.AddTransient<IPropertyCheckerService, PropertyCheckerService>();
         builder.Services.AddScoped<IPixelMartRepository, PixelMartRepository>();
+        builder.Services.AddScoped<IProductsRepository, ProductsRepository>();
+        builder.Services.AddScoped<ICategoriesRepository, CategoriesRepository>();
+        builder.Services.AddScoped<IOrdersRepository, OrdersRepository>();
+        builder.Services.AddScoped<IShoppingCartsRepository, ShoppingCartsRepository>();
+        builder.Services.AddScoped<IStocksRepository, StocksRepository>();
         builder.Services.AddMemoryCache();
         builder.Services.AddScoped<ICacheService, CacheService>();
 
@@ -205,7 +209,7 @@ internal static class StartupHelperExtensions
         using (var scope = app.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<PixelMartDbContext>();
-            db.Database.Migrate();
+            await db.Database.MigrateAsync();
 
             await AppDbInitializer.SeedRolesToDb(app);
         }

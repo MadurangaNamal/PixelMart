@@ -15,12 +15,14 @@ namespace PixelMart.API.Controllers;
 public class OrdersController : ControllerBase
 {
     private readonly IPixelMartRepository _pixelMartRepository;
+    private readonly IOrdersRepository _ordersRepository;
     private readonly IMapper _mapper;
     private readonly RequestLogHelper _requestLogHelper;
 
-    public OrdersController(IPixelMartRepository pixelMartRepository, IMapper mapper, RequestLogHelper requestLogHelper)
+    public OrdersController(IPixelMartRepository pixelMartRepository, IOrdersRepository ordersRepository, IMapper mapper, RequestLogHelper requestLogHelper)
     {
         _pixelMartRepository = pixelMartRepository ?? throw new ArgumentNullException(nameof(pixelMartRepository));
+        _ordersRepository = ordersRepository ?? throw new ArgumentNullException(nameof(ordersRepository));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _requestLogHelper = requestLogHelper ?? throw new ArgumentNullException(nameof(requestLogHelper));
     }
@@ -31,7 +33,7 @@ public class OrdersController : ControllerBase
     {
         _requestLogHelper.LogInfo("GET /api/orders CALLED TO RETRIEVE ALL ORDERS");
 
-        var orders = await _pixelMartRepository.GetAllOrdersAsync();
+        var orders = await _ordersRepository.GetAllOrdersAsync();
         var ordersResponse = _mapper.Map<IEnumerable<OrderDto>>(orders);
 
         return Ok(ordersResponse);
@@ -43,7 +45,7 @@ public class OrdersController : ControllerBase
         _requestLogHelper.LogInfo($"GET /api/orders/user-order CALLED TO RETRIEVE ORDERS FOR A USER");
 
         var userId = _requestLogHelper.GetUserId();
-        var orders = (userId != Guid.Empty) ? await _pixelMartRepository.GetOrdersForUserAsync(userId) : null!;
+        var orders = (userId != Guid.Empty) ? await _ordersRepository.GetOrdersForUserAsync(userId) : null!;
 
         if (orders == null || !orders.Any())
             return NotFound($"No orders found for user");
@@ -59,7 +61,7 @@ public class OrdersController : ControllerBase
         _requestLogHelper.LogInfo($"GET /api/orders/user-order/orderId CALLED TO RETRIEVE AN ORDER FOR A USER");
 
         var userId = _requestLogHelper.GetUserId();
-        var order = (userId != Guid.Empty) ? await _pixelMartRepository.GetOrderForUserAsync(userId, orderId) : null!;
+        var order = (userId != Guid.Empty) ? await _ordersRepository.GetOrderForUserAsync(userId, orderId) : null!;
 
         if (order is null)
             return NotFound($"Order not found for user");
@@ -81,7 +83,7 @@ public class OrdersController : ControllerBase
 
         var orderEntity = _mapper.Map<Order>(orderCreationDto);
 
-        await _pixelMartRepository.CreateOrderAsync(userId, orderEntity);
+        await _ordersRepository.CreateOrderAsync(userId, orderEntity);
         await _pixelMartRepository.SaveAsync();
 
         var orderToReturn = _mapper.Map<OrderDto>(orderEntity);
@@ -99,13 +101,13 @@ public class OrdersController : ControllerBase
         if (orderUpdateDto == null)
             return BadRequest("Order update data is required.");
 
-        var orderFromRepo = await _pixelMartRepository.GetOrderForUserAsync(userId, orderId);
+        var orderFromRepo = await _ordersRepository.GetOrderForUserAsync(userId, orderId);
 
         if (orderFromRepo is null)
             return NotFound($"Order with ID {orderId} not found for the user.");
 
         _mapper.Map(orderUpdateDto, orderFromRepo);
-        await _pixelMartRepository.UpdateOrderAsync(userId, orderId, orderFromRepo);
+        await _ordersRepository.UpdateOrderAsync(userId, orderId, orderFromRepo);
 
         return NoContent();
     }
@@ -116,16 +118,16 @@ public class OrdersController : ControllerBase
         _requestLogHelper.LogInfo($"DELETE /api/orders/user-order/{orderId} CALLED TO CANCEL AN ORDER FOR A USER");
 
         var userId = _requestLogHelper.GetUserId();
-        
+
         if (userId == Guid.Empty)
             return BadRequest("Invalid user ID");
 
-        var orderFromRepo = await _pixelMartRepository.GetOrderForUserAsync(userId, orderId);
-        
+        var orderFromRepo = await _ordersRepository.GetOrderForUserAsync(userId, orderId);
+
         if (orderFromRepo is null)
             return NotFound($"Order with ID {orderId} not found for the user.");
 
-        await _pixelMartRepository.CancelOrderAsync(orderFromRepo);
+        await _ordersRepository.CancelOrderAsync(orderFromRepo);
         await _pixelMartRepository.SaveAsync();
 
         return NoContent();

@@ -21,18 +21,27 @@ namespace PixelMart.API.Controllers;
 public class ProductsController : ControllerBase
 {
     private readonly IPixelMartRepository _pixelMartRepository;
+    private readonly IProductsRepository _productsRepository;
+    private readonly ICategoriesRepository _categoriesRepository;
+    private readonly IStocksRepository _stocksRepository;
     private readonly IMapper _mapper;
     private readonly IPropertyMappingService _propertyMappingService;
     private readonly RequestLogHelper _requestLogHelper;
     private readonly ICacheService _cacheService;
 
     public ProductsController(IPixelMartRepository pixelMartRepository,
+        IProductsRepository productsRepository,
+        ICategoriesRepository categoriesRepository,
+        IStocksRepository stocksRepository,
         IMapper mapper,
         IPropertyMappingService propertyMappingService,
         RequestLogHelper requestLogHelper,
         ICacheService cacheService)
     {
         _pixelMartRepository = pixelMartRepository ?? throw new ArgumentNullException(nameof(pixelMartRepository));
+        _productsRepository = productsRepository ?? throw new ArgumentNullException(nameof(productsRepository));
+        _categoriesRepository = categoriesRepository ?? throw new ArgumentNullException(nameof(categoriesRepository));
+        _stocksRepository = stocksRepository ?? throw new ArgumentNullException(nameof(stocksRepository));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _propertyMappingService = propertyMappingService ?? throw new ArgumentNullException(nameof(propertyMappingService));
         _requestLogHelper = requestLogHelper ?? throw new ArgumentNullException(nameof(requestLogHelper));
@@ -46,18 +55,18 @@ public class ProductsController : ControllerBase
     {
         _requestLogHelper.LogInfo($"GET /api/categories/{categoryId}/products CALLED TO RETRIEVE PRODUCTS FOR A CATEGORY");
 
-        if (!await _pixelMartRepository.CategoryExistsAsync(categoryId))
+        if (!await _categoriesRepository.CategoryExistsAsync(categoryId))
             return NotFound();
 
         // Validate the orderBy parameter
         if (!_propertyMappingService.ValidMappingExistsFor<ProductDto, Product>(productsResourceParameters.OrderBy))
             return BadRequest();
 
-        var productsFromRepo = await _pixelMartRepository.GetProductsAsync(categoryId, productsResourceParameters);
+        var productsFromRepo = await _productsRepository.GetProductsAsync(categoryId, productsResourceParameters);
 
         foreach (Product product in productsFromRepo)
         {
-            product.Stock = _pixelMartRepository.GetItemStockAsync(product.Id).Result;
+            product.Stock = _stocksRepository.GetItemStockAsync(product.Id).Result;
         }
 
         var productsResponse = _mapper.Map<IEnumerable<ProductDto>>(productsFromRepo);
@@ -79,8 +88,8 @@ public class ProductsController : ControllerBase
             return Ok(cachedProductDto);
         }
 
-        var categoryExistsTask = _pixelMartRepository.CategoryExistsAsync(categoryId);
-        var productTask = _pixelMartRepository.GetproductAsync(categoryId, productId);
+        var categoryExistsTask = _categoriesRepository.CategoryExistsAsync(categoryId);
+        var productTask = _productsRepository.GetproductAsync(categoryId, productId);
 
         await Task.WhenAll(categoryExistsTask, productTask);
 
@@ -92,7 +101,7 @@ public class ProductsController : ControllerBase
         if (productFromRepo == null)
             return NotFound();
 
-        productFromRepo.Stock = await _pixelMartRepository.GetItemStockAsync(productFromRepo.Id);
+        productFromRepo.Stock = await _stocksRepository.GetItemStockAsync(productFromRepo.Id);
 
         var productDto = _mapper.Map<ProductDto>(productFromRepo);
         _cacheService.SetProductDto(cacheKey, productDto);
@@ -107,12 +116,12 @@ public class ProductsController : ControllerBase
     {
         _requestLogHelper.LogInfo($"POST /api/categories/{categoryId}/products CALLED TO ADD A NEW PRODUCT");
 
-        if (!await _pixelMartRepository.CategoryExistsAsync(categoryId))
+        if (!await _categoriesRepository.CategoryExistsAsync(categoryId))
             return NotFound();
 
         var productEntity = _mapper.Map<Product>(product);
 
-        await _pixelMartRepository.AddProductAsync(categoryId, productEntity);
+        await _productsRepository.AddProductAsync(categoryId, productEntity);
         await _pixelMartRepository.SaveAsync();
 
         var productToReturn = _mapper.Map<ProductDto>(productEntity);
@@ -126,17 +135,17 @@ public class ProductsController : ControllerBase
     {
         _requestLogHelper.LogInfo($"PUT /api/categories/{categoryId}/products/{productId} CALLED TO UPDATE A PRODUCT");
 
-        if (!await _pixelMartRepository.CategoryExistsAsync(categoryId))
+        if (!await _categoriesRepository.CategoryExistsAsync(categoryId))
             return NotFound();
 
-        var productFromRepo = await _pixelMartRepository.GetproductAsync(categoryId, productId);
+        var productFromRepo = await _productsRepository.GetproductAsync(categoryId, productId);
 
         if (productFromRepo == null)
         {
             var productToAdd = _mapper.Map<Product>(product);
             productToAdd.Id = productId;
 
-            await _pixelMartRepository.AddProductAsync(categoryId, productToAdd);
+            await _productsRepository.AddProductAsync(categoryId, productToAdd);
             await _pixelMartRepository.SaveAsync();
 
             var productToReturn = _mapper.Map<ProductDto>(productToAdd);
@@ -146,7 +155,7 @@ public class ProductsController : ControllerBase
 
         _mapper.Map(product, productFromRepo); // apply new values
 
-        await _pixelMartRepository.UpdateProductAsync(productFromRepo);
+        await _productsRepository.UpdateProductAsync(productFromRepo);
 
         return NoContent();
     }
@@ -160,10 +169,10 @@ public class ProductsController : ControllerBase
     {
         _requestLogHelper.LogInfo($"PATCH /api/categories/{categoryId}/products/{productId} CALLED TO PARTIALLY UPDATE A PRODUCT");
 
-        if (!await _pixelMartRepository.CategoryExistsAsync(categoryId))
+        if (!await _categoriesRepository.CategoryExistsAsync(categoryId))
             return NotFound();
 
-        var productFromRepo = await _pixelMartRepository.GetproductAsync(categoryId, productId);
+        var productFromRepo = await _productsRepository.GetproductAsync(categoryId, productId);
 
         if (productFromRepo == null)
         {
@@ -177,7 +186,7 @@ public class ProductsController : ControllerBase
             var productToAdd = _mapper.Map<Product>(productDto);
             productToAdd.Id = productId;
 
-            await _pixelMartRepository.AddProductAsync(categoryId, productToAdd);
+            await _productsRepository.AddProductAsync(categoryId, productToAdd);
             await _pixelMartRepository.SaveAsync();
 
             var productToReturn = _mapper.Map<ProductDto>(productToAdd);
@@ -194,7 +203,7 @@ public class ProductsController : ControllerBase
 
         _mapper.Map(productToPatch, productFromRepo);
 
-        await _pixelMartRepository.UpdateProductAsync(productFromRepo);
+        await _productsRepository.UpdateProductAsync(productFromRepo);
 
         return NoContent();
     }
@@ -205,15 +214,15 @@ public class ProductsController : ControllerBase
     {
         _requestLogHelper.LogInfo($"DELETE /api/categories/{categoryId}/products/{productId} CALLED TO DELETE A PRODUCT");
 
-        if (!await _pixelMartRepository.CategoryExistsAsync(categoryId))
+        if (!await _categoriesRepository.CategoryExistsAsync(categoryId))
             return NotFound();
 
-        var productFromRepo = await _pixelMartRepository.GetproductAsync(categoryId, productId);
+        var productFromRepo = await _productsRepository.GetproductAsync(categoryId, productId);
 
         if (productFromRepo == null)
             return NotFound();
 
-        await _pixelMartRepository.DeleteProductAsync(productFromRepo);
+        await _productsRepository.DeleteProductAsync(productFromRepo);
 
         return NoContent();
     }

@@ -15,12 +15,14 @@ namespace PixelMart.API.Controllers;
 public class CategoriesController : ControllerBase
 {
     private readonly IPixelMartRepository _pixelMartRepository;
+    private readonly ICategoriesRepository _categoriesRepository;
     private readonly IMapper _mapper;
     private readonly RequestLogHelper _requestLogHelper;
 
-    public CategoriesController(IPixelMartRepository pixelMartRepository, IMapper mapper, RequestLogHelper requestLogHelper)
+    public CategoriesController(IPixelMartRepository pixelMartRepository, ICategoriesRepository categoriesRepository, IMapper mapper, RequestLogHelper requestLogHelper)
     {
         _pixelMartRepository = pixelMartRepository ?? throw new ArgumentNullException(nameof(pixelMartRepository));
+        _categoriesRepository = categoriesRepository ?? throw new ArgumentNullException(nameof(categoriesRepository));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _requestLogHelper = requestLogHelper ?? throw new ArgumentNullException(nameof(requestLogHelper));
     }
@@ -30,7 +32,7 @@ public class CategoriesController : ControllerBase
     {
         _requestLogHelper.LogInfo("GET /api/categories CALLED TO RETRIEVE ALL PRODUCT CATEGORIES");
 
-        var categories = await _pixelMartRepository.GetCategoriesAsync();
+        var categories = await _categoriesRepository.GetCategoriesAsync();
         var categoriesResponse = _mapper.Map<IEnumerable<CategoryDto>>(categories);
 
         return Ok(categoriesResponse);
@@ -41,10 +43,10 @@ public class CategoriesController : ControllerBase
     {
         _requestLogHelper.LogInfo($"GET /api/categories/{categoryId} CALLED TO RETRIEVE SINGLE CATEGORY");
 
-        if (!await _pixelMartRepository.CategoryExistsAsync(categoryId))
+        if (!await _categoriesRepository.CategoryExistsAsync(categoryId))
             return NotFound();
 
-        var categoryFromRepo = await _pixelMartRepository.GetCategoryAsync(categoryId);
+        var categoryFromRepo = await _categoriesRepository.GetCategoryAsync(categoryId);
 
         if (categoryFromRepo == null)
             return NotFound();
@@ -61,7 +63,7 @@ public class CategoriesController : ControllerBase
         _requestLogHelper.LogInfo("POST /api/categories CALLED TO CREATE A NEW CATEGORY");
 
         var categoryDto = _mapper.Map<Category>(category);
-        await _pixelMartRepository.AddCategoryAsync(categoryDto);
+        await _categoriesRepository.AddCategoryAsync(categoryDto);
         await _pixelMartRepository.SaveAsync();
 
         var categoryToReturn = _mapper.Map<CategoryDto>(categoryDto);
@@ -75,13 +77,13 @@ public class CategoriesController : ControllerBase
     {
         _requestLogHelper.LogInfo($"PUT /api/categories/{categoryId} CALLED TO UPDATE A CATEGORY");
 
-        if (!await _pixelMartRepository.CategoryExistsAsync(categoryId))
+        if (!await _categoriesRepository.CategoryExistsAsync(categoryId))
             return NotFound();
 
-        var categoryFromRepo = await _pixelMartRepository.GetCategoryAsync(categoryId);
+        var categoryFromRepo = await _categoriesRepository.GetCategoryAsync(categoryId);
         _mapper.Map(category, categoryFromRepo); // apply new values 
 
-        await _pixelMartRepository.UpdateCategoryAsync(categoryFromRepo!);
+        await _categoriesRepository.UpdateCategoryAsync(categoryFromRepo!);
 
         return NoContent();
     }
@@ -92,15 +94,15 @@ public class CategoriesController : ControllerBase
     {
         _requestLogHelper.LogInfo($"DELETE /api/categories/{categoryId} CALLED TO DELETE A CATEGORY");
 
-        if (!await _pixelMartRepository.CategoryExistsAsync(categoryId))
+        if (!await _categoriesRepository.CategoryExistsAsync(categoryId))
             return NotFound();
 
-        var categoryFromRepo = await _pixelMartRepository.GetCategoryAsync(categoryId);
+        var categoryFromRepo = await _categoriesRepository.GetCategoryAsync(categoryId);
 
         if (categoryFromRepo == null)
             return NotFound();
 
-        await _pixelMartRepository.DeleteCategoryAsync(categoryFromRepo);
+        await _categoriesRepository.DeleteCategoryAsync(categoryFromRepo);
 
         return NoContent();
     }

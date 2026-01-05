@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using PixelMart.API.DbContexts;
+using PixelMart.API.Data;
 using PixelMart.API.Entities;
 using PixelMart.API.Helpers;
 using PixelMart.API.Models.Identity;
