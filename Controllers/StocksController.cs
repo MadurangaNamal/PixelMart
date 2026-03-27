@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using PixelMart.API.Entities;
 using PixelMart.API.Helpers;
 using PixelMart.API.Models.Identity;
@@ -31,6 +32,7 @@ public class StocksController : ControllerBase
 
     [Authorize(Roles = $"{UserRoles.Admin}, {UserRoles.User}")]
     [HttpGet]
+    [OutputCache]
     public async Task<ActionResult<IEnumerable<StockItemDto>>> GetAllStocks()
     {
         _requestLogHelper.LogInfo("GET /api/item-stocks CALLED TO RETRIEVE ALL STOCKS");
@@ -42,6 +44,7 @@ public class StocksController : ControllerBase
     }
 
     [HttpGet("{productId}", Name = "GetStockForProduct")]
+    [OutputCache]
     public async Task<ActionResult<StockItemDto>> GetProductStock(Guid productId)
     {
         _requestLogHelper.LogInfo($"GET /api/item-stocks/{productId} CALLED TO RETRIEVE STOCKS FOR A PRODUCT");

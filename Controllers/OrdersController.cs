@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using PixelMart.API.Entities;
 using PixelMart.API.Helpers;
 using PixelMart.API.Models.Identity;
@@ -29,6 +30,7 @@ public class OrdersController : ControllerBase
 
     [HttpGet]
     [Authorize(Roles = $"{UserRoles.Admin}, {UserRoles.User}")]
+    [OutputCache]
     public async Task<ActionResult<IEnumerable<OrderDto>>> GetAllOrders()
     {
         _requestLogHelper.LogInfo("GET /api/orders CALLED TO RETRIEVE ALL ORDERS");
@@ -40,6 +42,7 @@ public class OrdersController : ControllerBase
     }
 
     [HttpGet("user-order")]
+    [OutputCache]
     public async Task<ActionResult<IEnumerable<OrderDto>>> GetOrdersByUserId()
     {
         _requestLogHelper.LogInfo($"GET /api/orders/user-order CALLED TO RETRIEVE ORDERS FOR A USER");
@@ -56,6 +59,7 @@ public class OrdersController : ControllerBase
     }
 
     [HttpGet("user-order/{orderId}", Name = "GetOrderById")]
+    [OutputCache]
     public async Task<ActionResult<OrderDto>> GetOrderByOrderId(Guid orderId)
     {
         _requestLogHelper.LogInfo($"GET /api/orders/user-order/orderId CALLED TO RETRIEVE AN ORDER FOR A USER");

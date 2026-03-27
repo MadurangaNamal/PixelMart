@@ -66,7 +66,11 @@ internal static class StartupHelperExtensions
         builder.Services.AddMemoryCache();
         builder.Services.AddScoped<ICacheService, CacheService>();
 
-        // Add Rate Limiter
+        builder.Services.AddOutputCache(options =>
+        {
+            options.DefaultExpirationTimeSpan = TimeSpan.FromMinutes(2);
+        });
+
         builder.Services.AddRateLimiter(options =>
         {
             options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
@@ -149,7 +153,6 @@ internal static class StartupHelperExtensions
             .AddXmlDataContractSerializerFormatters(); // Add XML support
 
         builder.Services.AddEndpointsApiExplorer();
-
         builder.Services.AddSwaggerGen(c =>
         {
             c.SwaggerDoc("v1", new OpenApiInfo { Title = "PixelMart.API", Version = "v1" });
@@ -204,6 +207,7 @@ internal static class StartupHelperExtensions
         app.UseRateLimiter();
         app.UseAuthentication();
         app.UseAuthorization();
+        app.UseOutputCache();
         app.MapControllers();
 
         using (var scope = app.Services.CreateScope())

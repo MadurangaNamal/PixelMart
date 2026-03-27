@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using PixelMart.API.Entities;
 using PixelMart.API.Helpers;
 using PixelMart.API.Models.Category;
@@ -28,6 +29,7 @@ public class CategoriesController : ControllerBase
     }
 
     [HttpGet(Name = "GetAllCategories")]
+    [OutputCache]
     public async Task<ActionResult<IEnumerable<CategoryDto>>> GetAllCategories()
     {
         _requestLogHelper.LogInfo("GET /api/categories CALLED TO RETRIEVE ALL PRODUCT CATEGORIES");
@@ -39,6 +41,7 @@ public class CategoriesController : ControllerBase
     }
 
     [HttpGet("{categoryId}", Name = "GetCategory")]
+    [OutputCache]
     public async Task<ActionResult<CategoryDto>> GetCategory(Guid categoryId)
     {
         _requestLogHelper.LogInfo($"GET /api/categories/{categoryId} CALLED TO RETRIEVE SINGLE CATEGORY");

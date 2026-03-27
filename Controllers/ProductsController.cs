@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.Extensions.Options;
 using PixelMart.API.Entities;
 using PixelMart.API.Helpers;
@@ -49,6 +50,7 @@ public class ProductsController : ControllerBase
     }
 
     [HttpGet(Name = "GetProductsForCategory")]
+    [OutputCache]
     public async Task<ActionResult<IEnumerable<ProductDto>>> GetProducts(
         Guid categoryId,
         [FromQuery] ProductsResourceParameters productsResourceParameters)
@@ -75,6 +77,7 @@ public class ProductsController : ControllerBase
     }
 
     [HttpGet("{productId}", Name = "GetProductForCategory")]
+    [OutputCache]
     public async Task<ActionResult<ProductDto>> GetProductForCategory(Guid categoryId, Guid productId)
     {
         _requestLogHelper.LogInfo($"GET /api/categories/{categoryId}/products/{productId} CALLED TO RETRIEVE SINGLE PRODUCT");

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using PixelMart.API.Entities;
 using PixelMart.API.Helpers;
 using PixelMart.API.Models.Identity;
@@ -30,6 +31,7 @@ public class ShoppingCartsController : ControllerBase
 
     [Authorize(Roles = $"{UserRoles.Admin}, {UserRoles.User}")]
     [HttpGet]
+    [OutputCache]
     public async Task<ActionResult<IEnumerable<ShoppingCartDto>>> GetAllCartDetails()
     {
         _requestLogHelper.LogInfo("GET /api/shopping-carts CALLED TO RETRIEVE ALL SHOPPING CARTS");
@@ -41,6 +43,7 @@ public class ShoppingCartsController : ControllerBase
     }
 
     [HttpGet("user-cart", Name = "GetCartForUser")]
+    [OutputCache]
     public async Task<ActionResult<ShoppingCartDto>> GetCartDetails()
     {
         _requestLogHelper.LogInfo("GET /api/shopping-carts/user-cart CALLED TO RETRIEVE SHOPPING CART DETAILS FOR USER");
