@@ -102,11 +102,11 @@ internal static class StartupHelperExtensions
             options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
 
-        })  // Add JWT Bearer
+        })
             .AddJwtBearer(options =>
         {
             options.SaveToken = true;
-            options.RequireHttpsMetadata = false;
+            options.RequireHttpsMetadata = !builder.Environment.IsDevelopment();
             options.TokenValidationParameters = tokenValidationParameters;
             options.Events = new JwtBearerEvents
             {
@@ -195,7 +195,11 @@ internal static class StartupHelperExtensions
         {
             app.UseDeveloperExceptionPage();
             app.UseSwagger();
-            app.UseSwaggerUI();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "PixelMart API V1");
+                c.RoutePrefix = "swagger";
+            });
         }
         else
         {
@@ -213,9 +217,25 @@ internal static class StartupHelperExtensions
         using (var scope = app.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<PixelMartDbContext>();
-            await db.Database.MigrateAsync();
+            var retryCount = 3;
 
-            await AppDbInitializer.SeedRolesToDb(app);
+            for (int i = 0; i < retryCount; i++)
+            {
+                try
+                {
+                    await db.Database.MigrateAsync();
+                    await AppDbInitializer.SeedRolesToDb(app);
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    if (i == retryCount - 1)
+                        throw;
+
+                    app.Logger.LogWarning(ex, "DB migration failed, retrying ({Attempt}/{Max})...", i + 1, retryCount);
+                    await Task.Delay(TimeSpan.FromSeconds(10));
+                }
+            }
         }
 
         return app;
