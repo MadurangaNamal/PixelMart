@@ -6,6 +6,7 @@ using Microsoft.OpenApi.Models;
 using PixelMart.API.Data;
 using PixelMart.API.Entities;
 using PixelMart.API.Helpers;
+using PixelMart.API.Profiles;
 using PixelMart.API.Repositories;
 using PixelMart.API.Services;
 using PixelMart.API.Services.Impl;
@@ -184,7 +185,14 @@ internal static class StartupHelperExtensions
             });
         });
 
-        builder.Services.AddAutoMapper(typeof(Program));
+        builder.Services.AddAutoMapper(cfg =>
+        {
+            cfg.AddProfile<ProductsProfile>();
+            cfg.AddProfile<CategoriesProfile>();
+            cfg.AddProfile<OrdersProfile>();
+            cfg.AddProfile<ShoppingCartsProfile>();
+            cfg.AddProfile<StocksProfile>();
+        });
 
         return builder.Build();
     }
