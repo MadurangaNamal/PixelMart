@@ -31,11 +31,11 @@ public class Order
 
     public ICollection<OrderItem> Items { get; set; } = [];
 
-    // Foreign key to ApplicationUser
+    // Foreign key
     [Required]
     public required string UserId { get; set; }
 
-    // Navigation property to ApplicationUser
+    // Navigation property
     [ForeignKey("UserId")]
     public required ApplicationUser User { get; set; }
 

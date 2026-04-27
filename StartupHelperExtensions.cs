@@ -8,6 +8,7 @@ using PixelMart.API.Entities;
 using PixelMart.API.Helpers;
 using PixelMart.API.Profiles;
 using PixelMart.API.Repositories;
+using PixelMart.API.Repositories.Impl;
 using PixelMart.API.Services;
 using PixelMart.API.Services.Impl;
 using System.Text;

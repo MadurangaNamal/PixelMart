@@ -51,8 +51,7 @@ public class ProductsController : ControllerBase
 
     [HttpGet(Name = "GetProductsForCategory")]
     [OutputCache]
-    public async Task<ActionResult<IEnumerable<ProductDto>>> GetProducts(
-        Guid categoryId,
+    public async Task<ActionResult<IEnumerable<ProductDto>>> GetProducts(Guid categoryId,
         [FromQuery] ProductsResourceParameters productsResourceParameters)
     {
         _requestLogHelper.LogInfo($"GET /api/categories/{categoryId}/products CALLED TO RETRIEVE PRODUCTS FOR A CATEGORY");
@@ -165,7 +164,7 @@ public class ProductsController : ControllerBase
 
     [Authorize(Roles = $"{UserRoles.Admin}, {UserRoles.User}")]
     [HttpPatch("{productId}")]
-    public async Task<IActionResult> PartiallyUpdateProductForCategory(
+    public async Task<IActionResult> PartiallyUpdateProduct(
         Guid categoryId,
         Guid productId,
         JsonPatchDocument<ProductForUpdateDto> patchDocument)
@@ -198,7 +197,6 @@ public class ProductsController : ControllerBase
         }
 
         var productToPatch = _mapper.Map<ProductForUpdateDto>(productFromRepo);
-
         patchDocument.ApplyTo(productToPatch, ModelState);
 
         if (!TryValidateModel(productToPatch))

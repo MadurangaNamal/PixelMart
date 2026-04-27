@@ -12,7 +12,7 @@ namespace PixelMart.API.Controllers;
 
 [Authorize]
 [ApiController]
-[Route("api/orders")]
+[Route("api/[controller]")]
 public class OrdersController : ControllerBase
 {
     private readonly IPixelMartRepository _pixelMartRepository;

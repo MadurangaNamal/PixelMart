@@ -1,6 +1,6 @@
 ﻿using PixelMart.API.Data;
 
-namespace PixelMart.API.Repositories;
+namespace PixelMart.API.Repositories.Impl;
 
 public class PixelMartRepository : IPixelMartRepository
 {

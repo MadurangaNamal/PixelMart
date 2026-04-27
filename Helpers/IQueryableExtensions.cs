@@ -4,9 +4,7 @@ namespace PixelMart.API.Helpers;
 
 public static class IQueryableExtensions
 {
-    public static IQueryable<T> ApplySort<T>(
-        this IQueryable<T> source,
-        string orderBy,
+    public static IQueryable<T> ApplySort<T>(this IQueryable<T> source, string orderBy,
         Dictionary<string, PropertyMappingValue> mappingDictionary)
     {
         if (source == null)
@@ -25,27 +23,20 @@ public static class IQueryableExtensions
         }
 
         var orderByString = string.Empty;
-
-        // the orderBy string is separated by ",", so we split it.
         var orderByAfterSplit = orderBy.Split(',');
 
         // apply each orderby clause  
         foreach (var orderByClause in orderByAfterSplit)
         {
-            // trim the orderBy clause, as it might contain leading or trailing spaces.
-            // Can't trim the var in foreach,so use another var.
+            // trim the orderBy clause, as it might contain leading or trailing spaces. 
             var trimmedOrderByClause = orderByClause.Trim();
 
-            // if the sort option ends with with " desc", we order
-            // descending, ortherwise ascending
+            // if the sort option ends with with " desc", we order descending, ortherwise ascending
             var orderDescending = trimmedOrderByClause.EndsWith(" desc");
 
-            // remove " asc" or " desc" from the orderBy clause, so we 
-            // get the property name to look for in the mapping dictionary
+            // remove " asc" or " desc" from the orderBy clause, so we get the property name
             var indexOfFirstSpace = trimmedOrderByClause.IndexOf(" ");
-            var propertyName = indexOfFirstSpace == -1 ?
-                trimmedOrderByClause : trimmedOrderByClause
-                .Remove(indexOfFirstSpace);
+            var propertyName = indexOfFirstSpace == -1 ? trimmedOrderByClause : trimmedOrderByClause.Remove(indexOfFirstSpace);
 
             // find the matching property
             if (!mappingDictionary.ContainsKey(propertyName))
@@ -68,8 +59,7 @@ public static class IQueryableExtensions
             }
 
             // Run through the property names 
-            foreach (var destinationProperty in
-                propertyMappingValue.DestinationProperties)
+            foreach (var destinationProperty in propertyMappingValue.DestinationProperties)
             {
                 orderByString = orderByString + (string.IsNullOrWhiteSpace(orderByString) ? string.Empty : ", ")
                     + destinationProperty + (orderDescending ? " descending" : " ascending");

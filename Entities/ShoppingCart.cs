@@ -11,15 +11,11 @@ public class ShoppingCart
     [Required]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    // Navigation properties
     public ICollection<CartItem> Items { get; set; } = [];
 
-    // Foreign key to ApplicationUser
     [Required]
     public string UserId { get; set; } = default!;
 
-    // Navigation property to ApplicationUser
     [ForeignKey("UserId")]
     public ApplicationUser User { get; set; } = default!;
-
 }

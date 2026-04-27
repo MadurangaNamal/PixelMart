@@ -12,7 +12,6 @@ using System.Text;
 
 namespace PixelMart.API.Controllers;
 
-
 [Route("api/auth")]
 [ApiController]
 public class AuthenticationController : ControllerBase
@@ -37,8 +36,7 @@ public class AuthenticationController : ControllerBase
     }
 
     [HttpPost("register")]
-    public async Task<IActionResult> Register(
-        [FromBody] RegisterDto registerDto)
+    public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
     {
         _requestLogHelper.LogInfo("POST /api/auth/register CALLED TO REGISTER NEW USER");
 
@@ -94,8 +92,7 @@ public class AuthenticationController : ControllerBase
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login(
-        [FromBody] LoginDto loginDto)
+    public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
     {
         _requestLogHelper.LogInfo("POST /api/auth/login CALLED TO LOGIN USER");
 
@@ -118,8 +115,7 @@ public class AuthenticationController : ControllerBase
     }
 
     [HttpPost("refresh-token")]
-    public async Task<IActionResult> RefreshToken(
-        [FromBody] TokenRequestDto tokenRequestDto)
+    public async Task<IActionResult> RefreshToken([FromBody] TokenRequestDto tokenRequestDto)
     {
         _requestLogHelper.LogInfo("POST /api/auth/refresh-token CALLED TO REFRESH TOKEN");
 

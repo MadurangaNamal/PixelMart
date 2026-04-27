@@ -7,7 +7,6 @@ public class RefreshToken
 {
     [Key]
     public int Id { get; set; }
-
     public string Token { get; set; } = default!;
     public string JwtId { get; set; } = default!;
     public bool IsRevoked { get; set; }

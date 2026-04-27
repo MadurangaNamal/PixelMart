@@ -12,7 +12,7 @@ namespace PixelMart.API.Controllers;
 
 [Authorize]
 [ApiController]
-[Route("api/categories")]
+[Route("api/[controller]")]
 public class CategoriesController : ControllerBase
 {
     private readonly IPixelMartRepository _pixelMartRepository;
@@ -20,7 +20,8 @@ public class CategoriesController : ControllerBase
     private readonly IMapper _mapper;
     private readonly RequestLogHelper _requestLogHelper;
 
-    public CategoriesController(IPixelMartRepository pixelMartRepository, ICategoriesRepository categoriesRepository, IMapper mapper, RequestLogHelper requestLogHelper)
+    public CategoriesController(IPixelMartRepository pixelMartRepository,
+        ICategoriesRepository categoriesRepository, IMapper mapper, RequestLogHelper requestLogHelper)
     {
         _pixelMartRepository = pixelMartRepository ?? throw new ArgumentNullException(nameof(pixelMartRepository));
         _categoriesRepository = categoriesRepository ?? throw new ArgumentNullException(nameof(categoriesRepository));

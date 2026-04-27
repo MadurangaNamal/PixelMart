@@ -2,7 +2,7 @@
 using PixelMart.API.Data;
 using PixelMart.API.Entities;
 
-namespace PixelMart.API.Repositories;
+namespace PixelMart.API.Repositories.Impl;
 
 public class StocksRepository : IStocksRepository
 {

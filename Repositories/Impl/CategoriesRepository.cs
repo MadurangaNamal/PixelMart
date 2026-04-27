@@ -2,7 +2,7 @@
 using PixelMart.API.Data;
 using PixelMart.API.Entities;
 
-namespace PixelMart.API.Repositories;
+namespace PixelMart.API.Repositories.Impl;
 
 public class CategoriesRepository : ICategoriesRepository
 {
@@ -15,7 +15,7 @@ public class CategoriesRepository : ICategoriesRepository
 
     public async Task<IEnumerable<Category>> GetCategoriesAsync()
     {
-        // return await _context.Categories.Include(c => c.Products).ToListAsync(); // include product details if needed
+        // return await _context.Categories.Include(c => c.Products).ToListAsync();
         return await _dbContext.Categories.AsNoTracking().ToListAsync();
     }
 
@@ -56,7 +56,9 @@ public class CategoriesRepository : ICategoriesRepository
             throw new ArgumentException("Category ID cannot be empty.", nameof(categoryId));
         }
 
-        return await _dbContext.Categories.AsNoTracking().AnyAsync(c => c.Id == categoryId);
+        return await _dbContext.Categories
+            .AsNoTracking()
+            .AnyAsync(c => c.Id == categoryId);
     }
 
     public async Task DeleteCategoryAsync(Category category)
@@ -74,5 +76,4 @@ public class CategoriesRepository : ICategoriesRepository
         _dbContext.Categories.Update(category);
         await _dbContext.SaveChangesAsync();
     }
-
 }

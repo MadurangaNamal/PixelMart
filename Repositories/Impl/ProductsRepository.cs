@@ -6,7 +6,7 @@ using PixelMart.API.Helpers.ResourceParameters;
 using PixelMart.API.Models.Product;
 using PixelMart.API.Services;
 
-namespace PixelMart.API.Repositories;
+namespace PixelMart.API.Repositories.Impl;
 
 public class ProductsRepository : IProductsRepository
 {
@@ -79,9 +79,7 @@ public class ProductsRepository : IProductsRepository
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task<PagedList<Product>> GetProductsAsync(
-        Guid categoryId,
-        ProductsResourceParameters productsResourceParameters)
+    public async Task<PagedList<Product>> GetProductsAsync(Guid categoryId, ProductsResourceParameters productsResourceParameters)
     {
         if (productsResourceParameters == null)
         {
@@ -108,9 +106,8 @@ public class ProductsRepository : IProductsRepository
                 .ApplySort(productsResourceParameters.OrderBy, authorPropertyMappingDictionary);
         }
 
-        return await PagedList<Product>.CreateAsync(productsCollection,
-             productsResourceParameters.PageNumber,
-             productsResourceParameters.PageSize);
+        return await PagedList<Product>.CreateAsync(productsCollection, productsResourceParameters.PageNumber,
+            productsResourceParameters.PageSize);
     }
 
     public async Task<bool> ProductExistsAsync(Guid productId)
@@ -120,7 +117,9 @@ public class ProductsRepository : IProductsRepository
             throw new ArgumentException("Product ID cannot be empty.", nameof(productId));
         }
 
-        return await _dbContext.Products.AsNoTracking().AnyAsync(p => p.Id == productId);
+        return await _dbContext.Products
+            .AsNoTracking()
+            .AnyAsync(p => p.Id == productId);
     }
 
 }

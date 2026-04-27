@@ -5,6 +5,10 @@ namespace PixelMart.API.Entities;
 
 public class Product
 {
+    public Product()
+    {
+    }
+
     [Key]
     public Guid Id { get; set; }
 
@@ -30,10 +34,6 @@ public class Product
     public Category? Category { get; set; }
 
     public Stock? Stock { get; set; }
-
-    public Product()
-    {
-    }
 
     public Product(string name)
     {

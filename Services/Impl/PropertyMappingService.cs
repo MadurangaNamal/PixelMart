@@ -12,13 +12,13 @@ public class PropertyMappingService : IPropertyMappingService
 {
     private readonly Dictionary<string, PropertyMappingValue> _productPropertyMapping = new(StringComparer.OrdinalIgnoreCase)
         {
-            { "Id", new(new[] { "Id" }) },
-            { "Name", new(new[] { "Name" }) },
-            { "FullName", new(new[] { "Brand","Name" }) }
+            { "Id", new(["Id"]) },
+            { "Name", new(["Name"]) },
+            { "FullName", new(["Brand","Name"]) }
         };
 
     // list of property mappings
-    private readonly IList<IPropertyMapping> _propertyMappings = new List<IPropertyMapping>();
+    private readonly IList<IPropertyMapping> _propertyMappings = [];
 
     public PropertyMappingService()
     {
@@ -50,17 +50,14 @@ public class PropertyMappingService : IPropertyMappingService
             return true;
         }
 
-        // the string is separated by ",", so we split it.
         var fieldsAfterSplit = fields.Split(',');
 
-        // run through the fields clauses
         foreach (var field in fieldsAfterSplit)
         {
             var trimmedField = field.Trim();
 
             // remove everything after the first " " 
             var indexOfFirstSpace = trimmedField.IndexOf(" ");
-
             var propertyName = indexOfFirstSpace == -1 ? trimmedField : trimmedField.Remove(indexOfFirstSpace);
 
             // find the matching property
