@@ -6,6 +6,7 @@ using Microsoft.OpenApi.Models;
 using PixelMart.API.Data;
 using PixelMart.API.Entities;
 using PixelMart.API.Helpers;
+using PixelMart.API.Middlewares;
 using PixelMart.API.Profiles;
 using PixelMart.API.Repositories;
 using PixelMart.API.Repositories.Impl;
@@ -217,6 +218,8 @@ internal static class StartupHelperExtensions
 
     public static async Task<WebApplication> ConfigurePipelineAsync(this WebApplication app)
     {
+        app.UseMiddleware<ExceptionHandlingMiddleware>();
+
         if (app.Environment.IsDevelopment())
         {
             app.UseDeveloperExceptionPage();
@@ -229,7 +232,6 @@ internal static class StartupHelperExtensions
         }
         else
         {
-            app.UseExceptionHandler("/Error");
             app.UseHsts();
         }
 
