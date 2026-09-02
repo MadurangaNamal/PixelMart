@@ -31,12 +31,29 @@ internal static class StartupHelperExtensions
 
         var connectionString = rawConnectionString.Replace("{DB_PASSWORD}", dbPassword);
 
+        var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+            ?? throw new InvalidOperationException("Allowed origins not found in configuration.");
+
+        builder.Services.AddCors(options =>
+        {
+            options.AddPolicy("AllowPixelMartWebApp", policy =>
+            {
+                policy.WithOrigins(allowedOrigins)
+                      .AllowAnyMethod()
+                      .AllowAnyHeader()
+                      .AllowCredentials()
+                      .WithExposedHeaders("X-Pagination");
+            });
+        });
+
         builder.Logging.ClearProviders();
         builder.Logging.AddConsole();
         builder.Logging.AddDebug();
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddScoped<RequestLogHelper>();
-        builder.Services.AddDbContext<PixelMartDbContext>(options => options.UseSqlServer(connectionString));
+        builder.Services.AddDbContext<PixelMartDbContext>(options =>
+            options.UseSqlServer(connectionString, sqlServerOptions =>
+                sqlServerOptions.EnableRetryOnFailure(3, TimeSpan.FromSeconds(30), null)));
 
         var jwtSecret = builder.Configuration["JWT_SECRET_KEY"]
             ?? throw new InvalidOperationException("JWT secret key not found in configuration.");
@@ -217,6 +234,7 @@ internal static class StartupHelperExtensions
         }
 
         app.UseHttpsRedirection();
+        app.UseCors("AllowPixelMartWebApp");
         app.UseRateLimiter();
         app.UseAuthentication();
         app.UseAuthorization();
