@@ -31,11 +31,11 @@ public class CategoriesController : ControllerBase
 
     [HttpGet(Name = "GetAllCategories")]
     [OutputCache]
-    public async Task<ActionResult<IEnumerable<CategoryDto>>> GetAllCategories()
+    public async Task<ActionResult<IEnumerable<CategoryDto>>> GetAllCategories(CancellationToken cancellationToken)
     {
         _requestLogHelper.LogInfo("GET /api/categories CALLED TO RETRIEVE ALL PRODUCT CATEGORIES");
 
-        var categories = await _categoriesRepository.GetCategoriesAsync();
+        var categories = await _categoriesRepository.GetCategoriesAsync(cancellationToken);
         var categoriesResponse = _mapper.Map<IEnumerable<CategoryDto>>(categories);
 
         return Ok(categoriesResponse);
@@ -43,14 +43,14 @@ public class CategoriesController : ControllerBase
 
     [HttpGet("{categoryId}", Name = "GetCategory")]
     [OutputCache]
-    public async Task<ActionResult<CategoryDto>> GetCategory(Guid categoryId)
+    public async Task<ActionResult<CategoryDto>> GetCategory(Guid categoryId, CancellationToken cancellationToken)
     {
         _requestLogHelper.LogInfo($"GET /api/categories/{categoryId} CALLED TO RETRIEVE SINGLE CATEGORY");
 
-        if (!await _categoriesRepository.CategoryExistsAsync(categoryId))
+        if (!await _categoriesRepository.CategoryExistsAsync(categoryId, cancellationToken))
             return NotFound();
 
-        var categoryFromRepo = await _categoriesRepository.GetCategoryAsync(categoryId);
+        var categoryFromRepo = await _categoriesRepository.GetCategoryAsync(categoryId, cancellationToken);
 
         if (categoryFromRepo == null)
             return NotFound();
@@ -62,13 +62,13 @@ public class CategoriesController : ControllerBase
 
     [Authorize(Roles = $"{UserRoles.Admin}, {UserRoles.User}")]
     [HttpPost(Name = "CreateNewCategory")]
-    public async Task<IActionResult> CreateCategory(CategoryForCreationDto category)
+    public async Task<IActionResult> CreateCategory(CategoryForCreationDto category, CancellationToken cancellationToken)
     {
         _requestLogHelper.LogInfo("POST /api/categories CALLED TO CREATE A NEW CATEGORY");
 
         var categoryDto = _mapper.Map<Category>(category);
-        await _categoriesRepository.AddCategoryAsync(categoryDto);
-        await _pixelMartRepository.SaveAsync();
+        await _categoriesRepository.AddCategoryAsync(categoryDto, cancellationToken);
+        await _pixelMartRepository.SaveAsync(cancellationToken);
 
         var categoryToReturn = _mapper.Map<CategoryDto>(categoryDto);
 
@@ -77,36 +77,36 @@ public class CategoriesController : ControllerBase
 
     [Authorize(Roles = UserRoles.Admin)]
     [HttpPut("{categoryId}")]
-    public async Task<IActionResult> UpdateCategory(Guid categoryId, CategoryForUpdateDto category)
+    public async Task<IActionResult> UpdateCategory(Guid categoryId, CategoryForUpdateDto category, CancellationToken cancellationToken)
     {
         _requestLogHelper.LogInfo($"PUT /api/categories/{categoryId} CALLED TO UPDATE A CATEGORY");
 
-        if (!await _categoriesRepository.CategoryExistsAsync(categoryId))
+        if (!await _categoriesRepository.CategoryExistsAsync(categoryId, cancellationToken))
             return NotFound();
 
-        var categoryFromRepo = await _categoriesRepository.GetCategoryAsync(categoryId);
+        var categoryFromRepo = await _categoriesRepository.GetCategoryAsync(categoryId, cancellationToken);
         _mapper.Map(category, categoryFromRepo); // apply new values 
 
-        await _categoriesRepository.UpdateCategoryAsync(categoryFromRepo!);
+        await _categoriesRepository.UpdateCategoryAsync(categoryFromRepo!, cancellationToken);
 
         return NoContent();
     }
 
     [Authorize(Roles = UserRoles.Admin)]
     [HttpDelete("{categoryId}")]
-    public async Task<IActionResult> DeleteCategory(Guid categoryId)
+    public async Task<IActionResult> DeleteCategory(Guid categoryId, CancellationToken cancellationToken)
     {
         _requestLogHelper.LogInfo($"DELETE /api/categories/{categoryId} CALLED TO DELETE A CATEGORY");
 
-        if (!await _categoriesRepository.CategoryExistsAsync(categoryId))
+        if (!await _categoriesRepository.CategoryExistsAsync(categoryId, cancellationToken))
             return NotFound();
 
-        var categoryFromRepo = await _categoriesRepository.GetCategoryAsync(categoryId);
+        var categoryFromRepo = await _categoriesRepository.GetCategoryAsync(categoryId, cancellationToken);
 
         if (categoryFromRepo == null)
             return NotFound();
 
-        await _categoriesRepository.DeleteCategoryAsync(categoryFromRepo);
+        await _categoriesRepository.DeleteCategoryAsync(categoryFromRepo, cancellationToken);
 
         return NoContent();
     }

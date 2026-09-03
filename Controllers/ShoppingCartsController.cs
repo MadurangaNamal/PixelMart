@@ -21,7 +21,8 @@ public class ShoppingCartsController : ControllerBase
     private readonly IMapper _mapper;
     private readonly RequestLogHelper _requestLogHelper;
 
-    public ShoppingCartsController(IPixelMartRepository pixelMartRepository, IShoppingCartsRepository shoppingCartsRepository, IMapper mapper, RequestLogHelper requestLogHelper)
+    public ShoppingCartsController(IPixelMartRepository pixelMartRepository, IShoppingCartsRepository shoppingCartsRepository,
+        IMapper mapper, RequestLogHelper requestLogHelper)
     {
         _pixelMartRepository = pixelMartRepository ?? throw new ArgumentNullException(nameof(pixelMartRepository));
         _shoppingCartsRepository = shoppingCartsRepository ?? throw new ArgumentNullException(nameof(shoppingCartsRepository));
@@ -32,11 +33,11 @@ public class ShoppingCartsController : ControllerBase
     [Authorize(Roles = $"{UserRoles.Admin}, {UserRoles.User}")]
     [HttpGet]
     [OutputCache]
-    public async Task<ActionResult<IEnumerable<ShoppingCartDto>>> GetAllCartDetails()
+    public async Task<ActionResult<IEnumerable<ShoppingCartDto>>> GetAllCartDetails(CancellationToken cancellationToken)
     {
         _requestLogHelper.LogInfo("GET /api/shopping-carts CALLED TO RETRIEVE ALL SHOPPING CARTS");
 
-        var shoppingCarts = await _shoppingCartsRepository.GetAllCartDetailsAsync();
+        var shoppingCarts = await _shoppingCartsRepository.GetAllCartDetailsAsync(cancellationToken);
         var shoppingCartsResponse = _mapper.Map<IEnumerable<ShoppingCartDto>>(shoppingCarts);
 
         return Ok(shoppingCartsResponse);
@@ -44,7 +45,7 @@ public class ShoppingCartsController : ControllerBase
 
     [HttpGet("user-cart", Name = "GetCartForUser")]
     [OutputCache]
-    public async Task<ActionResult<ShoppingCartDto>> GetCartDetails()
+    public async Task<ActionResult<ShoppingCartDto>> GetCartDetails(CancellationToken cancellationToken)
     {
         _requestLogHelper.LogInfo("GET /api/shopping-carts/user-cart CALLED TO RETRIEVE SHOPPING CART DETAILS FOR USER");
 
@@ -53,14 +54,15 @@ public class ShoppingCartsController : ControllerBase
         if (userId == Guid.Empty)
             return BadRequest("Invalid user ID");
 
-        var shoppingCart = await _shoppingCartsRepository.GetCartDetailsForUserAsync(userId);
+        var shoppingCart = await _shoppingCartsRepository.GetCartDetailsForUserAsync(userId, cancellationToken);
         var shoppingCartResponse = _mapper.Map<ShoppingCartDto>(shoppingCart);
 
         return Ok(shoppingCartResponse);
     }
 
     [HttpPost("user-cart")]
-    public async Task<IActionResult> AddToShoppingCart(ShoppingCartCreationDto shoppingCartCreationDto)
+    public async Task<IActionResult> AddToShoppingCart(ShoppingCartCreationDto shoppingCartCreationDto,
+        CancellationToken cancellationToken)
     {
         _requestLogHelper.LogInfo($"POST /api/shopping-carts/user-cart CALLED TO ADD SHOPPING CART FOR A USER");
 
@@ -71,8 +73,8 @@ public class ShoppingCartsController : ControllerBase
 
         var cartEntity = _mapper.Map<ShoppingCart>(shoppingCartCreationDto);
 
-        await _shoppingCartsRepository.AddShoppingCartAsync(userId, cartEntity);
-        await _pixelMartRepository.SaveAsync();
+        await _shoppingCartsRepository.AddShoppingCartAsync(userId, cartEntity, cancellationToken);
+        await _pixelMartRepository.SaveAsync(cancellationToken);
 
         var cartToReturn = _mapper.Map<ShoppingCartDto>(cartEntity);
 
@@ -80,7 +82,8 @@ public class ShoppingCartsController : ControllerBase
     }
 
     [HttpPut("user-cart")]
-    public async Task<IActionResult> UpdateShoppingCart(ShoppingCartManipulationDto shoppingCartUpdateDto)
+    public async Task<IActionResult> UpdateShoppingCart(ShoppingCartManipulationDto shoppingCartUpdateDto,
+        CancellationToken cancellationToken)
     {
         _requestLogHelper.LogInfo($"PUT /api/shopping-carts/user-cart CALLED TO UPDTAE THE SHOPPING CART FOR A USER");
 
@@ -89,26 +92,27 @@ public class ShoppingCartsController : ControllerBase
         if (userId == Guid.Empty)
             return BadRequest("Invalid user ID");
 
-        var cartFromRepo = await _shoppingCartsRepository.GetCartDetailsForUserAsync(userId);
+        var cartFromRepo = await _shoppingCartsRepository.GetCartDetailsForUserAsync(userId, cancellationToken);
 
         if (cartFromRepo == null)
         {
             var CartToAdd = _mapper.Map<ShoppingCart>(shoppingCartUpdateDto);
 
-            await _shoppingCartsRepository.AddShoppingCartAsync(userId, CartToAdd);
-            await _pixelMartRepository.SaveAsync();
+            await _shoppingCartsRepository.AddShoppingCartAsync(userId, CartToAdd, cancellationToken);
+            await _pixelMartRepository.SaveAsync(cancellationToken);
 
             return CreatedAtRoute("GetCartForUser", CartToAdd);
         }
 
         _mapper.Map(shoppingCartUpdateDto, cartFromRepo);
-        await _shoppingCartsRepository.UpdateShoppingCartAsync(userId, cartFromRepo);
+        await _shoppingCartsRepository.UpdateShoppingCartAsync(userId, cartFromRepo, cancellationToken);
 
         return NoContent();
     }
 
     [HttpPatch("user-cart")]
-    public async Task<IActionResult> PartiallyUpdateShoppingCart(JsonPatchDocument<ShoppingCartUpdateDto> patchDocument)
+    public async Task<IActionResult> PartiallyUpdateShoppingCart(JsonPatchDocument<ShoppingCartUpdateDto> patchDocument,
+        CancellationToken cancellationToken)
     {
         _requestLogHelper.LogInfo($"PATCH /api/shopping-carts/user-cart CALLED TO PARTIALLY UPDTAE THE SHOPPING CART FOR A USER");
 
@@ -117,7 +121,7 @@ public class ShoppingCartsController : ControllerBase
         if (userId == Guid.Empty)
             return BadRequest("Invalid user ID");
 
-        var cartFromRepo = await _shoppingCartsRepository.GetCartDetailsForUserAsync(userId);
+        var cartFromRepo = await _shoppingCartsRepository.GetCartDetailsForUserAsync(userId, cancellationToken);
 
         if (cartFromRepo == null)
         {
@@ -130,8 +134,8 @@ public class ShoppingCartsController : ControllerBase
 
             var cartToAdd = _mapper.Map<ShoppingCart>(shoppingCartDto);
 
-            await _shoppingCartsRepository.AddShoppingCartAsync(userId, cartToAdd);
-            await _pixelMartRepository.SaveAsync();
+            await _shoppingCartsRepository.AddShoppingCartAsync(userId, cartToAdd, cancellationToken);
+            await _pixelMartRepository.SaveAsync(cancellationToken);
 
             var cartToReturn = _mapper.Map<ShoppingCartDto>(cartToAdd);
 
@@ -146,13 +150,13 @@ public class ShoppingCartsController : ControllerBase
             return ValidationProblem(ModelState);
 
         _mapper.Map(shoppingCartToPatch, cartFromRepo);
-        await _shoppingCartsRepository.UpdateShoppingCartAsync(userId, cartFromRepo);
+        await _shoppingCartsRepository.UpdateShoppingCartAsync(userId, cartFromRepo, cancellationToken);
 
         return NoContent();
     }
 
     [HttpDelete("user-cart")]
-    public async Task<IActionResult> DeleteUserShoppingCart()
+    public async Task<IActionResult> DeleteUserShoppingCart(CancellationToken cancellationToken)
     {
         _requestLogHelper.LogInfo($"DELETE /api/shopping-carts/user-cart CALLED TO DELETE SHOPPING CART FOR USER");
 
@@ -161,12 +165,12 @@ public class ShoppingCartsController : ControllerBase
         if (userId == Guid.Empty)
             return BadRequest("Invalid user ID");
 
-        var cartForUserFromRepo = await _shoppingCartsRepository.GetCartDetailsForUserAsync(userId);
+        var cartForUserFromRepo = await _shoppingCartsRepository.GetCartDetailsForUserAsync(userId, cancellationToken);
 
         if (cartForUserFromRepo is null)
             return NotFound();
 
-        await _shoppingCartsRepository.DeleteShoppingCartAsync(cartForUserFromRepo);
+        await _shoppingCartsRepository.DeleteShoppingCartAsync(cartForUserFromRepo, cancellationToken);
 
         return NoContent();
     }

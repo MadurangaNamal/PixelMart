@@ -17,6 +17,10 @@ public class ExceptionHandlingMiddleware
         {
             await _next(context);
         }
+        catch (OperationCanceledException ex) when (context.RequestAborted.IsCancellationRequested)
+        {
+            _logger.LogInformation(ex, "Request was cancelled by the client.");
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Unhandled exception occurred");

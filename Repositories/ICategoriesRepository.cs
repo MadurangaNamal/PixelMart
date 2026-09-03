@@ -4,10 +4,10 @@ namespace PixelMart.API.Repositories;
 
 public interface ICategoriesRepository
 {
-    Task<IEnumerable<Category>> GetCategoriesAsync();
-    Task<Category?> GetCategoryAsync(Guid categoryId);
-    Task AddCategoryAsync(Category category);
-    Task DeleteCategoryAsync(Category category);
-    Task UpdateCategoryAsync(Category category);
-    Task<bool> CategoryExistsAsync(Guid categoryId);
+    Task<IEnumerable<Category>> GetCategoriesAsync(CancellationToken cancellationToken = default);
+    Task<Category?> GetCategoryAsync(Guid categoryId, CancellationToken cancellationToken = default);
+    Task AddCategoryAsync(Category category, CancellationToken cancellationToken = default);
+    Task DeleteCategoryAsync(Category category, CancellationToken cancellationToken = default);
+    Task UpdateCategoryAsync(Category category, CancellationToken cancellationToken = default);
+    Task<bool> CategoryExistsAsync(Guid categoryId, CancellationToken cancellationToken = default);
 }

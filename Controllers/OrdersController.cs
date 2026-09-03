@@ -20,7 +20,8 @@ public class OrdersController : ControllerBase
     private readonly IMapper _mapper;
     private readonly RequestLogHelper _requestLogHelper;
 
-    public OrdersController(IPixelMartRepository pixelMartRepository, IOrdersRepository ordersRepository, IMapper mapper, RequestLogHelper requestLogHelper)
+    public OrdersController(IPixelMartRepository pixelMartRepository, IOrdersRepository ordersRepository, IMapper mapper,
+        RequestLogHelper requestLogHelper)
     {
         _pixelMartRepository = pixelMartRepository ?? throw new ArgumentNullException(nameof(pixelMartRepository));
         _ordersRepository = ordersRepository ?? throw new ArgumentNullException(nameof(ordersRepository));
@@ -31,11 +32,11 @@ public class OrdersController : ControllerBase
     [HttpGet]
     [Authorize(Roles = $"{UserRoles.Admin}, {UserRoles.User}")]
     [OutputCache]
-    public async Task<ActionResult<IEnumerable<OrderDto>>> GetAllOrders()
+    public async Task<ActionResult<IEnumerable<OrderDto>>> GetAllOrders(CancellationToken cancellationToken)
     {
         _requestLogHelper.LogInfo("GET /api/orders CALLED TO RETRIEVE ALL ORDERS");
 
-        var orders = await _ordersRepository.GetAllOrdersAsync();
+        var orders = await _ordersRepository.GetAllOrdersAsync(cancellationToken);
         var ordersResponse = _mapper.Map<IEnumerable<OrderDto>>(orders);
 
         return Ok(ordersResponse);
@@ -43,12 +44,12 @@ public class OrdersController : ControllerBase
 
     [HttpGet("user-order")]
     [OutputCache]
-    public async Task<ActionResult<IEnumerable<OrderDto>>> GetOrdersByUserId()
+    public async Task<ActionResult<IEnumerable<OrderDto>>> GetOrdersByUserId(CancellationToken cancellationToken)
     {
         _requestLogHelper.LogInfo($"GET /api/orders/user-order CALLED TO RETRIEVE ORDERS FOR A USER");
 
         var userId = _requestLogHelper.GetUserId();
-        var orders = (userId != Guid.Empty) ? await _ordersRepository.GetOrdersForUserAsync(userId) : null!;
+        var orders = (userId != Guid.Empty) ? await _ordersRepository.GetOrdersForUserAsync(userId, cancellationToken) : null!;
 
         if (orders == null || !orders.Any())
             return NotFound($"No orders found for user");
@@ -60,12 +61,12 @@ public class OrdersController : ControllerBase
 
     [HttpGet("user-order/{orderId}", Name = "GetOrderById")]
     [OutputCache]
-    public async Task<ActionResult<OrderDto>> GetOrderByOrderId(Guid orderId)
+    public async Task<ActionResult<OrderDto>> GetOrderByOrderId(Guid orderId, CancellationToken cancellationToken)
     {
         _requestLogHelper.LogInfo($"GET /api/orders/user-order/orderId CALLED TO RETRIEVE AN ORDER FOR A USER");
 
         var userId = _requestLogHelper.GetUserId();
-        var order = (userId != Guid.Empty) ? await _ordersRepository.GetOrderForUserAsync(userId, orderId) : null!;
+        var order = (userId != Guid.Empty) ? await _ordersRepository.GetOrderForUserAsync(userId, orderId, cancellationToken) : null!;
 
         if (order is null)
             return NotFound($"Order not found for user");
@@ -76,7 +77,7 @@ public class OrdersController : ControllerBase
     }
 
     [HttpPost("user-order")]
-    public async Task<IActionResult> CreateNewOrder(OrderCreationDto orderCreationDto)
+    public async Task<IActionResult> CreateNewOrder(OrderCreationDto orderCreationDto, CancellationToken cancellationToken)
     {
         _requestLogHelper.LogInfo($"POST /api/orders/user-order CALLED TO CREATE AN ORDER FOR A USER");
 
@@ -87,8 +88,8 @@ public class OrdersController : ControllerBase
 
         var orderEntity = _mapper.Map<Order>(orderCreationDto);
 
-        await _ordersRepository.CreateOrderAsync(userId, orderEntity);
-        await _pixelMartRepository.SaveAsync();
+        await _ordersRepository.CreateOrderAsync(userId, orderEntity, cancellationToken);
+        await _pixelMartRepository.SaveAsync(cancellationToken);
 
         var orderToReturn = _mapper.Map<OrderDto>(orderEntity);
 
@@ -96,7 +97,7 @@ public class OrdersController : ControllerBase
     }
 
     [HttpPut("user-order/{orderId}")]
-    public async Task<IActionResult> UpdateOrder(Guid orderId, OrderUpdateDto orderUpdateDto)
+    public async Task<IActionResult> UpdateOrder(Guid orderId, OrderUpdateDto orderUpdateDto, CancellationToken cancellationToken)
     {
         _requestLogHelper.LogInfo($"PUT /api/orders/user-order/{orderId} CALLED TO UPDATE AN ORDER FOR A USER");
 
@@ -105,19 +106,19 @@ public class OrdersController : ControllerBase
         if (orderUpdateDto == null)
             return BadRequest("Order update data is required.");
 
-        var orderFromRepo = await _ordersRepository.GetOrderForUserAsync(userId, orderId);
+        var orderFromRepo = await _ordersRepository.GetOrderForUserAsync(userId, orderId, cancellationToken);
 
         if (orderFromRepo is null)
             return NotFound($"Order with ID {orderId} not found for the user.");
 
         _mapper.Map(orderUpdateDto, orderFromRepo);
-        await _ordersRepository.UpdateOrderAsync(userId, orderId, orderFromRepo);
+        await _ordersRepository.UpdateOrderAsync(userId, orderId, orderFromRepo, cancellationToken);
 
         return NoContent();
     }
 
     [HttpDelete("user-order/{orderId}")]
-    public async Task<IActionResult> CancelOrder(Guid orderId)
+    public async Task<IActionResult> CancelOrder(Guid orderId, CancellationToken cancellationToken)
     {
         _requestLogHelper.LogInfo($"DELETE /api/orders/user-order/{orderId} CALLED TO CANCEL AN ORDER FOR A USER");
 
@@ -126,13 +127,13 @@ public class OrdersController : ControllerBase
         if (userId == Guid.Empty)
             return BadRequest("Invalid user ID");
 
-        var orderFromRepo = await _ordersRepository.GetOrderForUserAsync(userId, orderId);
+        var orderFromRepo = await _ordersRepository.GetOrderForUserAsync(userId, orderId, cancellationToken);
 
         if (orderFromRepo is null)
             return NotFound($"Order with ID {orderId} not found for the user.");
 
-        await _ordersRepository.CancelOrderAsync(orderFromRepo);
-        await _pixelMartRepository.SaveAsync();
+        await _ordersRepository.CancelOrderAsync(orderFromRepo, cancellationToken);
+        await _pixelMartRepository.SaveAsync(cancellationToken);
 
         return NoContent();
     }

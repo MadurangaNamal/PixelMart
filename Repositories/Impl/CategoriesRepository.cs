@@ -13,13 +13,13 @@ public class CategoriesRepository : ICategoriesRepository
         _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
     }
 
-    public async Task<IEnumerable<Category>> GetCategoriesAsync()
+    public async Task<IEnumerable<Category>> GetCategoriesAsync(CancellationToken cancellationToken = default)
     {
-        // return await _context.Categories.Include(c => c.Products).ToListAsync();
-        return await _dbContext.Categories.AsNoTracking().ToListAsync();
+        // return await _context.Categories.Include(c => c.Products).ToListAsync(cancellationToken);
+        return await _dbContext.Categories.AsNoTracking().ToListAsync(cancellationToken);
     }
 
-    public async Task<Category?> GetCategoryAsync(Guid categoryId)
+    public async Task<Category?> GetCategoryAsync(Guid categoryId, CancellationToken cancellationToken = default)
     {
         if (categoryId == Guid.Empty)
         {
@@ -29,10 +29,10 @@ public class CategoriesRepository : ICategoriesRepository
         return await _dbContext.Categories
             .Include(c => c.Products)
             .AsNoTracking()
-            .FirstOrDefaultAsync(c => c.Id == categoryId);
+            .FirstOrDefaultAsync(c => c.Id == categoryId, cancellationToken);
     }
 
-    public async Task AddCategoryAsync(Category category)
+    public async Task AddCategoryAsync(Category category, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(category);
 
@@ -46,10 +46,10 @@ public class CategoriesRepository : ICategoriesRepository
             }
         }
 
-        await _dbContext.Categories.AddAsync(category);
+        await _dbContext.Categories.AddAsync(category, cancellationToken);
     }
 
-    public async Task<bool> CategoryExistsAsync(Guid categoryId)
+    public async Task<bool> CategoryExistsAsync(Guid categoryId, CancellationToken cancellationToken = default)
     {
         if (categoryId == Guid.Empty)
         {
@@ -58,22 +58,22 @@ public class CategoriesRepository : ICategoriesRepository
 
         return await _dbContext.Categories
             .AsNoTracking()
-            .AnyAsync(c => c.Id == categoryId);
+            .AnyAsync(c => c.Id == categoryId, cancellationToken);
     }
 
-    public async Task DeleteCategoryAsync(Category category)
+    public async Task DeleteCategoryAsync(Category category, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(category);
 
         _dbContext.Categories.Remove(category);
-        await _dbContext.SaveChangesAsync();
+        await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task UpdateCategoryAsync(Category category)
+    public async Task UpdateCategoryAsync(Category category, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(category);
 
         _dbContext.Categories.Update(category);
-        await _dbContext.SaveChangesAsync();
+        await _dbContext.SaveChangesAsync(cancellationToken);
     }
 }

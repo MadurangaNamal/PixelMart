@@ -2,5 +2,5 @@
 
 public interface IPixelMartRepository
 {
-    Task<bool> SaveAsync();
+    Task<bool> SaveAsync(CancellationToken cancellationToken = default);
 }

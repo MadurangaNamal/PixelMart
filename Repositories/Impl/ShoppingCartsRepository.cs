@@ -13,15 +13,15 @@ public class ShoppingCartsRepository : IShoppingCartsRepository
         _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
     }
 
-    public async Task<IEnumerable<ShoppingCart>> GetAllCartDetailsAsync()
+    public async Task<IEnumerable<ShoppingCart>> GetAllCartDetailsAsync(CancellationToken cancellationToken = default)
     {
         return await _dbContext.ShoppingCarts
             .Include(sc => sc.Items)
             .AsNoTracking()
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
     }
 
-    public async Task<ShoppingCart?> GetCartDetailsForUserAsync(Guid userId)
+    public async Task<ShoppingCart?> GetCartDetailsForUserAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         if (userId == Guid.Empty)
             throw new ArgumentException("User ID cannot be empty.", nameof(userId));
@@ -29,10 +29,10 @@ public class ShoppingCartsRepository : IShoppingCartsRepository
         return await _dbContext.ShoppingCarts
             .Include(sc => sc.Items)
             .AsNoTracking()
-            .FirstOrDefaultAsync(sc => sc.UserId == userId.ToString());
+            .FirstOrDefaultAsync(sc => sc.UserId == userId.ToString(), cancellationToken);
     }
 
-    public async Task AddShoppingCartAsync(Guid userId, ShoppingCart shoppingCart)
+    public async Task AddShoppingCartAsync(Guid userId, ShoppingCart shoppingCart, CancellationToken cancellationToken = default)
     {
         if (userId == Guid.Empty)
             throw new ArgumentException("User ID cannot be empty.", nameof(userId));
@@ -40,10 +40,11 @@ public class ShoppingCartsRepository : IShoppingCartsRepository
         ArgumentNullException.ThrowIfNull(shoppingCart);
 
         shoppingCart.UserId = userId.ToString();
-        await _dbContext.ShoppingCarts.AddAsync(shoppingCart);
+        await _dbContext.ShoppingCarts.AddAsync(shoppingCart, cancellationToken);
     }
 
-    public async Task UpdateShoppingCartAsync(Guid userId, ShoppingCart updatedShoppingCart)
+    public async Task UpdateShoppingCartAsync(Guid userId, ShoppingCart updatedShoppingCart,
+        CancellationToken cancellationToken = default)
     {
         if (userId == Guid.Empty)
             throw new ArgumentException("User ID cannot be empty.", nameof(userId));
@@ -52,7 +53,7 @@ public class ShoppingCartsRepository : IShoppingCartsRepository
 
         var shoppingCart = await _dbContext.ShoppingCarts
             .Include(c => c.Items)
-            .FirstOrDefaultAsync(c => c.UserId == userId.ToString());
+            .FirstOrDefaultAsync(c => c.UserId == userId.ToString(), cancellationToken);
 
         if (shoppingCart == null)
             throw new InvalidOperationException("Shopping cart not found.");
@@ -78,15 +79,14 @@ public class ShoppingCartsRepository : IShoppingCartsRepository
         }
 
         _dbContext.ShoppingCarts.Update(shoppingCart);
-        await _dbContext.SaveChangesAsync();
+        await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task DeleteShoppingCartAsync(ShoppingCart cart)
+    public async Task DeleteShoppingCartAsync(ShoppingCart cart, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(cart);
 
         _dbContext.ShoppingCarts.Remove(cart);
-        await _dbContext.SaveChangesAsync();
+        await _dbContext.SaveChangesAsync(cancellationToken);
     }
-
 }

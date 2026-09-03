@@ -18,7 +18,7 @@ public class ProductsRepository : IProductsRepository
         _propertyMappingService = propertyMappingService ?? throw new ArgumentNullException(nameof(propertyMappingService));
     }
 
-    public async Task<Product?> GetproductAsync(Guid categoryId, Guid productId)
+    public async Task<Product?> GetproductAsync(Guid categoryId, Guid productId, CancellationToken cancellationToken = default)
     {
         if (categoryId == Guid.Empty)
         {
@@ -33,10 +33,10 @@ public class ProductsRepository : IProductsRepository
         return await _dbContext.Products
             .Where(p => p.Id == productId && p.CategoryId == categoryId)
             .AsNoTracking()
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(cancellationToken);
     }
 
-    public async Task<IEnumerable<Product>> GetProductsAsync(Guid categoryId)
+    public async Task<IEnumerable<Product>> GetProductsAsync(Guid categoryId, CancellationToken cancellationToken = default)
     {
         if (categoryId == Guid.Empty)
         {
@@ -47,10 +47,10 @@ public class ProductsRepository : IProductsRepository
             .Where(p => p.CategoryId == categoryId)
             .OrderBy(p => p.Name)
             .AsNoTracking()
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
     }
 
-    public async Task AddProductAsync(Guid categoryId, Product product)
+    public async Task AddProductAsync(Guid categoryId, Product product, CancellationToken cancellationToken = default)
     {
         if (categoryId == Guid.Empty)
         {
@@ -60,26 +60,27 @@ public class ProductsRepository : IProductsRepository
         ArgumentNullException.ThrowIfNull(product);
 
         product.CategoryId = categoryId;
-        await _dbContext.Products.AddAsync(product);
+        await _dbContext.Products.AddAsync(product, cancellationToken);
     }
 
-    public async Task UpdateProductAsync(Product product)
+    public async Task UpdateProductAsync(Product product, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(product);
 
         _dbContext.Products.Update(product);
-        await _dbContext.SaveChangesAsync();
+        await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task DeleteProductAsync(Product product)
+    public async Task DeleteProductAsync(Product product, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(product);
 
         _dbContext.Products.Remove(product);
-        await _dbContext.SaveChangesAsync();
+        await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<PagedList<Product>> GetProductsAsync(Guid categoryId, ProductsResourceParameters productsResourceParameters)
+    public async Task<PagedList<Product>> GetProductsAsync(Guid categoryId, ProductsResourceParameters productsResourceParameters,
+        CancellationToken cancellationToken = default)
     {
         if (productsResourceParameters == null)
         {
@@ -107,10 +108,10 @@ public class ProductsRepository : IProductsRepository
         }
 
         return await PagedList<Product>.CreateAsync(productsCollection, productsResourceParameters.PageNumber,
-            productsResourceParameters.PageSize);
+            productsResourceParameters.PageSize, cancellationToken);
     }
 
-    public async Task<bool> ProductExistsAsync(Guid productId)
+    public async Task<bool> ProductExistsAsync(Guid productId, CancellationToken cancellationToken = default)
     {
         if (productId == Guid.Empty)
         {
@@ -119,7 +120,6 @@ public class ProductsRepository : IProductsRepository
 
         return await _dbContext.Products
             .AsNoTracking()
-            .AnyAsync(p => p.Id == productId);
+            .AnyAsync(p => p.Id == productId, cancellationToken);
     }
-
 }

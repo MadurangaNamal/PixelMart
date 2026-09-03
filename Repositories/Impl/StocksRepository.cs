@@ -13,12 +13,12 @@ public class StocksRepository : IStocksRepository
         _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
     }
 
-    public async Task<IEnumerable<Stock>> GetAllItemStocksAsync()
+    public async Task<IEnumerable<Stock>> GetAllItemStocksAsync(CancellationToken cancellationToken = default)
     {
-        return await _dbContext.Stocks.AsNoTracking().ToListAsync();
+        return await _dbContext.Stocks.AsNoTracking().ToListAsync(cancellationToken);
     }
 
-    public async Task<Stock?> GetItemStockAsync(Guid productId)
+    public async Task<Stock?> GetItemStockAsync(Guid productId, CancellationToken cancellationToken = default)
     {
         if (productId == Guid.Empty)
         {
@@ -27,10 +27,10 @@ public class StocksRepository : IStocksRepository
 
         return await _dbContext.Stocks
             .AsNoTracking()
-            .FirstOrDefaultAsync(s => s.ProductId == productId);
+            .FirstOrDefaultAsync(s => s.ProductId == productId, cancellationToken);
     }
 
-    public async Task AddItemStockAsync(Guid productId, Stock stock)
+    public async Task AddItemStockAsync(Guid productId, Stock stock, CancellationToken cancellationToken = default)
     {
         if (productId == Guid.Empty)
         {
@@ -40,10 +40,10 @@ public class StocksRepository : IStocksRepository
         ArgumentNullException.ThrowIfNull(stock);
 
         stock.ProductId = productId;
-        await _dbContext.Stocks.AddAsync(stock);
+        await _dbContext.Stocks.AddAsync(stock, cancellationToken);
     }
 
-    public async Task UpdateItemStockAsync(Guid productId, Stock itemStock)
+    public async Task UpdateItemStockAsync(Guid productId, Stock itemStock, CancellationToken cancellationToken = default)
     {
         if (productId == Guid.Empty)
         {
@@ -55,10 +55,10 @@ public class StocksRepository : IStocksRepository
         itemStock.ProductId = productId;
 
         _dbContext.Stocks.Update(itemStock);
-        await _dbContext.SaveChangesAsync();
+        await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<bool> StockExistsAsync(Guid productId)
+    public async Task<bool> StockExistsAsync(Guid productId, CancellationToken cancellationToken = default)
     {
         if (productId == Guid.Empty)
         {
@@ -67,7 +67,6 @@ public class StocksRepository : IStocksRepository
 
         return await _dbContext.Stocks
             .AsNoTracking()
-            .AnyAsync(s => s.ProductId == productId);
+            .AnyAsync(s => s.ProductId == productId, cancellationToken);
     }
-
 }

@@ -21,7 +21,8 @@ public class StocksController : ControllerBase
     private readonly IMapper _mapper;
     private readonly RequestLogHelper _requestLogHelper;
 
-    public StocksController(IPixelMartRepository pixelMartRepository, IStocksRepository stocksRepository, IProductsRepository productsRepository, IMapper mapper, RequestLogHelper requestLogHelper)
+    public StocksController(IPixelMartRepository pixelMartRepository, IStocksRepository stocksRepository, IProductsRepository productsRepository,
+        IMapper mapper, RequestLogHelper requestLogHelper)
     {
         _pixelMartRepository = pixelMartRepository ?? throw new ArgumentNullException(nameof(pixelMartRepository));
         _stocksRepository = stocksRepository ?? throw new ArgumentNullException(nameof(stocksRepository));
@@ -33,11 +34,11 @@ public class StocksController : ControllerBase
     [Authorize(Roles = $"{UserRoles.Admin}, {UserRoles.User}")]
     [HttpGet]
     [OutputCache]
-    public async Task<ActionResult<IEnumerable<StockItemDto>>> GetAllStocks()
+    public async Task<ActionResult<IEnumerable<StockItemDto>>> GetAllStocks(CancellationToken cancellationToken)
     {
         _requestLogHelper.LogInfo("GET /api/item-stocks CALLED TO RETRIEVE ALL STOCKS");
 
-        var stocks = await _stocksRepository.GetAllItemStocksAsync();
+        var stocks = await _stocksRepository.GetAllItemStocksAsync(cancellationToken);
         var stocksResponse = _mapper.Map<IEnumerable<StockItemDto>>(stocks);
 
         return Ok(stocksResponse);
@@ -45,14 +46,14 @@ public class StocksController : ControllerBase
 
     [HttpGet("{productId}", Name = "GetStockForProduct")]
     [OutputCache]
-    public async Task<ActionResult<StockItemDto>> GetProductStock(Guid productId)
+    public async Task<ActionResult<StockItemDto>> GetProductStock(Guid productId, CancellationToken cancellationToken)
     {
         _requestLogHelper.LogInfo($"GET /api/item-stocks/{productId} CALLED TO RETRIEVE STOCKS FOR A PRODUCT");
 
-        if (!await _stocksRepository.StockExistsAsync(productId))
+        if (!await _stocksRepository.StockExistsAsync(productId, cancellationToken))
             return NotFound();
 
-        var productStocksFromRepo = await _stocksRepository.GetItemStockAsync(productId);
+        var productStocksFromRepo = await _stocksRepository.GetItemStockAsync(productId, cancellationToken);
         var stockResponse = _mapper.Map<StockItemDto>(productStocksFromRepo);
 
         return Ok(stockResponse);
@@ -60,17 +61,17 @@ public class StocksController : ControllerBase
 
     [Authorize(Roles = $"{UserRoles.Admin}, {UserRoles.User}")]
     [HttpPost("{productId}")]
-    public async Task<IActionResult> AddProductStock(Guid productId, StockManipulationDto productStock)
+    public async Task<IActionResult> AddProductStock(Guid productId, StockManipulationDto productStock, CancellationToken cancellationToken)
     {
         _requestLogHelper.LogInfo($"POST /api/item-stocks/{productId} CALLED TO ADD STOCKS FOR A PRODUCT");
 
-        if (!await _productsRepository.ProductExistsAsync(productId))
+        if (!await _productsRepository.ProductExistsAsync(productId, cancellationToken))
             return NotFound();
 
         var stockEntity = _mapper.Map<Stock>(productStock);
 
-        await _stocksRepository.AddItemStockAsync(productId, stockEntity);
-        await _pixelMartRepository.SaveAsync();
+        await _stocksRepository.AddItemStockAsync(productId, stockEntity, cancellationToken);
+        await _pixelMartRepository.SaveAsync(cancellationToken);
 
         var productStockToReturn = _mapper.Map<StockItemDto>(stockEntity);
 
@@ -79,21 +80,21 @@ public class StocksController : ControllerBase
 
     [Authorize(Roles = $"{UserRoles.Admin}, {UserRoles.User}")]
     [HttpPut("{productId}")]
-    public async Task<IActionResult> UpdateProductStock(Guid productId, StockManipulationDto productStock)
+    public async Task<IActionResult> UpdateProductStock(Guid productId, StockManipulationDto productStock, CancellationToken cancellationToken)
     {
         _requestLogHelper.LogInfo($"PUT /api/item-stocks/{productId} CALLED TO UPDATE STOCKS FOR A PRODUCT");
 
-        if (!await _productsRepository.ProductExistsAsync(productId))
+        if (!await _productsRepository.ProductExistsAsync(productId, cancellationToken))
             return NotFound();
 
-        var productStockFromRepo = await _stocksRepository.GetItemStockAsync(productId);
+        var productStockFromRepo = await _stocksRepository.GetItemStockAsync(productId, cancellationToken);
 
         if (productStockFromRepo is null)
         {
             var stockToAdd = _mapper.Map<Stock>(productStock);
 
-            await _stocksRepository.AddItemStockAsync(productId, stockToAdd);
-            await _pixelMartRepository.SaveAsync();
+            await _stocksRepository.AddItemStockAsync(productId, stockToAdd, cancellationToken);
+            await _pixelMartRepository.SaveAsync(cancellationToken);
 
             var stockItemToReturn = _mapper.Map<StockItemDto>(stockToAdd);
 
@@ -101,7 +102,7 @@ public class StocksController : ControllerBase
         }
 
         _mapper.Map(productStock, productStockFromRepo);
-        await _stocksRepository.UpdateItemStockAsync(productId, productStockFromRepo);
+        await _stocksRepository.UpdateItemStockAsync(productId, productStockFromRepo, cancellationToken);
 
         return NoContent();
     }

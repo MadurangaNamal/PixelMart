@@ -13,28 +13,28 @@ public class OrdersRepository : IOrdersRepository
         _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
     }
 
-    public async Task<IEnumerable<Order>> GetAllOrdersAsync()
+    public async Task<IEnumerable<Order>> GetAllOrdersAsync(CancellationToken cancellationToken = default)
     {
         var orders = await _dbContext.Orders
             .Include(sc => sc.Items)
             .AsNoTracking()
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
 
         return orders;
     }
 
-    public async Task<IEnumerable<Order>> GetOrdersForUserAsync(Guid userId)
+    public async Task<IEnumerable<Order>> GetOrdersForUserAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         var userOrders = await _dbContext.Orders
             .Include(sc => sc.Items)
             .Where(o => o.UserId == userId.ToString())
             .AsNoTracking()
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
 
         return userOrders;
     }
 
-    public Task<Order?> GetOrderForUserAsync(Guid userId, Guid orderId)
+    public async Task<Order?> GetOrderForUserAsync(Guid userId, Guid orderId, CancellationToken cancellationToken = default)
     {
         if (userId == Guid.Empty)
             throw new ArgumentException("User ID cannot be empty.", nameof(userId));
@@ -42,15 +42,15 @@ public class OrdersRepository : IOrdersRepository
         if (orderId == Guid.Empty)
             throw new ArgumentException("Order ID cannot be empty.", nameof(orderId));
 
-        var order = _dbContext.Orders
+        var order = await _dbContext.Orders
             .Include(o => o.Items)
             .AsNoTracking()
-            .FirstOrDefaultAsync(o => o.UserId == userId.ToString() && o.Id == orderId);
+            .FirstOrDefaultAsync(o => o.UserId == userId.ToString() && o.Id == orderId, cancellationToken);
 
         return order == null ? throw new InvalidOperationException("Order not found for user.") : order!;
     }
 
-    public async Task CreateOrderAsync(Guid userId, Order order)
+    public async Task CreateOrderAsync(Guid userId, Order order, CancellationToken cancellationToken = default)
     {
         if (userId == Guid.Empty)
             throw new ArgumentException("User ID cannot be empty.", nameof(userId));
@@ -58,10 +58,11 @@ public class OrdersRepository : IOrdersRepository
         ArgumentNullException.ThrowIfNull(order);
 
         order.UserId = userId.ToString();
-        await _dbContext.Orders.AddAsync(order);
+        await _dbContext.Orders.AddAsync(order, cancellationToken);
     }
 
-    public async Task UpdateOrderAsync(Guid userId, Guid orderId, Order orderUpdated)
+    public async Task UpdateOrderAsync(Guid userId, Guid orderId, Order orderUpdated,
+        CancellationToken cancellationToken = default)
     {
         if (userId == Guid.Empty)
             throw new ArgumentException("User ID cannot be empty.", nameof(userId));
@@ -73,7 +74,7 @@ public class OrdersRepository : IOrdersRepository
 
         var userOrder = await _dbContext.Orders
             .Include(o => o.Items)
-            .FirstOrDefaultAsync(o => o.UserId == userId.ToString() && o.Id == orderId);
+            .FirstOrDefaultAsync(o => o.UserId == userId.ToString() && o.Id == orderId, cancellationToken);
 
         if (userOrder is null)
             throw new InvalidOperationException("Order not found for user.");
@@ -120,15 +121,14 @@ public class OrdersRepository : IOrdersRepository
         }
 
         _dbContext.Orders.Update(userOrder);
-        await _dbContext.SaveChangesAsync();
+        await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task CancelOrderAsync(Order order)
+    public async Task CancelOrderAsync(Order order, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(order);
 
         _dbContext.Orders.Remove(order);
-        await _dbContext.SaveChangesAsync();
+        await _dbContext.SaveChangesAsync(cancellationToken);
     }
-
 }
