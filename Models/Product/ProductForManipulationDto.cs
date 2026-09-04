@@ -17,4 +17,7 @@ public abstract class ProductForManipulationDto
 
     [MaxLength(1500, ErrorMessage = "The description shouldn't have more than 1500 characters.")]
     public virtual string Description { get; set; } = string.Empty;
+
+    [MaxLength(1500, ErrorMessage = "The image URL shouldn't have more than 1500 characters.")]
+    public virtual string? ImageUrl { get; set; } = null;
 }

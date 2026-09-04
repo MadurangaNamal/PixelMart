@@ -137,11 +137,11 @@ Import the included `PixelMart-Restful-API.postman_collection.json` for comprehe
 
 ### Sample API Endpoints
 - `POST /api/auth/login` - User authentication
-- `GET /api/products` - List products with pagination
-- `POST /api/products` - Create new product 
-- `PUT /api/products/{id}` - Product update
-- `PATCH /api/products/{id}` - Partial product update
-- `DELETE /api/products/{id}` - Remove product (Admin only)
+- `GET /api/categories/{categoryId}/products` - List products (with pagination)
+- `POST /api/categories/{categoryId}/products` - Create new product 
+- `PUT /api/categories/{categoryId}/products/{productId}` - Product update
+- `PATCH /api/categories/{categoryId}/products/{productId}` - Partial product update
+- `DELETE /api/categories/{categoryId}/products/{productId}` - Remove product (Admin only)
 - `GET /api/categories` - List all categories
 
 ## 🛡️ Security Features
