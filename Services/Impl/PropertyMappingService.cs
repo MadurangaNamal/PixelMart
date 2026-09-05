@@ -6,7 +6,8 @@ namespace PixelMart.API.Services.Impl;
 
 /// <summary>
 /// Service for managing property mappings between source and destination types.
-/// Enables flexible object-to-object mapping and validation of property mapping configurations, supporting dynamic field selection and sorting in APIs.
+/// Enables flexible object-to-object mapping and validation of property mapping configurations, 
+/// supporting dynamic field selection and sorting in APIs.
 /// </summary>
 public class PropertyMappingService : IPropertyMappingService
 {
@@ -14,6 +15,9 @@ public class PropertyMappingService : IPropertyMappingService
         {
             { "Id", new(["Id"]) },
             { "Name", new(["Name"]) },
+            { "Price", new(["Price"]) },
+            { "Brand", new(["Brand"]) },
+            { "Color", new(["Color"]) },
             { "FullName", new(["Brand","Name"]) }
         };
 
@@ -28,7 +32,6 @@ public class PropertyMappingService : IPropertyMappingService
     // Get the property mapping dictionary
     public Dictionary<string, PropertyMappingValue> GetPropertyMapping<TSource, TDestination>()
     {
-
         // get matching mapping
         var matchingMapping = _propertyMappings.OfType<PropertyMapping<TSource, TDestination>>();
 
@@ -37,7 +40,7 @@ public class PropertyMappingService : IPropertyMappingService
             return matchingMapping.First().MappingDictionary;
         }
 
-        throw new Exception($"Cannot find exact property mapping instance " + $"for <{typeof(TSource)},{typeof(TDestination)}");
+        throw new InvalidOperationException($"Cannot find exact property mapping instance for <{typeof(TSource)},{typeof(TDestination)}>");
     }
 
     // Validates if a valid mapping exists for the given fields

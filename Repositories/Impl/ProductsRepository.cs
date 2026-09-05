@@ -50,35 +50,6 @@ public class ProductsRepository : IProductsRepository
             .ToListAsync(cancellationToken);
     }
 
-    public async Task AddProductAsync(Guid categoryId, Product product, CancellationToken cancellationToken = default)
-    {
-        if (categoryId == Guid.Empty)
-        {
-            throw new ArgumentException("Category ID cannot be empty.", nameof(categoryId));
-        }
-
-        ArgumentNullException.ThrowIfNull(product);
-
-        product.CategoryId = categoryId;
-        await _dbContext.Products.AddAsync(product, cancellationToken);
-    }
-
-    public async Task UpdateProductAsync(Product product, CancellationToken cancellationToken = default)
-    {
-        ArgumentNullException.ThrowIfNull(product);
-
-        _dbContext.Products.Update(product);
-        await _dbContext.SaveChangesAsync(cancellationToken);
-    }
-
-    public async Task DeleteProductAsync(Product product, CancellationToken cancellationToken = default)
-    {
-        ArgumentNullException.ThrowIfNull(product);
-
-        _dbContext.Products.Remove(product);
-        await _dbContext.SaveChangesAsync(cancellationToken);
-    }
-
     public async Task<PagedList<Product>> GetProductsAsync(Guid categoryId, ProductsResourceParameters productsResourceParameters,
         CancellationToken cancellationToken = default)
     {
@@ -109,6 +80,60 @@ public class ProductsRepository : IProductsRepository
 
         return await PagedList<Product>.CreateAsync(productsCollection, productsResourceParameters.PageNumber,
             productsResourceParameters.PageSize, cancellationToken);
+    }
+
+    public async Task<PagedList<Product>> GetAllProductsAsync(ProductsResourceParameters productsResourceParameters,
+        CancellationToken cancellationToken = default)
+    {
+        var productsCollection = _dbContext.Products as IQueryable<Product>;
+
+        if (!string.IsNullOrWhiteSpace(productsResourceParameters.SearchQuery))
+        {
+            var searchTerm = productsResourceParameters.SearchQuery.Trim();
+
+            productsCollection = productsCollection.Where(pc => pc.Name.Contains(searchTerm) ||
+            pc.Brand.Contains(searchTerm) ||
+            pc.Description!.Contains(searchTerm));
+        }
+
+        if (!string.IsNullOrWhiteSpace(productsResourceParameters.OrderBy))
+        {
+            var authorPropertyMappingDictionary = _propertyMappingService.GetPropertyMapping<ProductDto, Product>();
+
+            productsCollection = productsCollection
+                .ApplySort(productsResourceParameters.OrderBy, authorPropertyMappingDictionary);
+        }
+
+        return await PagedList<Product>.CreateAsync(productsCollection, productsResourceParameters.PageNumber,
+            productsResourceParameters.PageSize, cancellationToken);
+    }
+    public async Task AddProductAsync(Guid categoryId, Product product, CancellationToken cancellationToken = default)
+    {
+        if (categoryId == Guid.Empty)
+        {
+            throw new ArgumentException("Category ID cannot be empty.", nameof(categoryId));
+        }
+
+        ArgumentNullException.ThrowIfNull(product);
+
+        product.CategoryId = categoryId;
+        await _dbContext.Products.AddAsync(product, cancellationToken);
+    }
+
+    public async Task UpdateProductAsync(Product product, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(product);
+
+        _dbContext.Products.Update(product);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task DeleteProductAsync(Product product, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(product);
+
+        _dbContext.Products.Remove(product);
+        await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
     public async Task<bool> ProductExistsAsync(Guid productId, CancellationToken cancellationToken = default)

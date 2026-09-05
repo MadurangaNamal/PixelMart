@@ -2,25 +2,22 @@
 
 namespace PixelMart.API.Helpers;
 
+/// <summary>
+/// Provides extension methods for IQueryable to apply sorting based on a given orderBy string and a property mapping dictionary.
+/// </summary>
 public static class IQueryableExtensions
 {
     public static IQueryable<T> ApplySort<T>(this IQueryable<T> source, string orderBy,
         Dictionary<string, PropertyMappingValue> mappingDictionary)
     {
         if (source == null)
-        {
             throw new ArgumentNullException(nameof(source));
-        }
 
         if (mappingDictionary == null)
-        {
             throw new ArgumentNullException(nameof(mappingDictionary));
-        }
 
         if (string.IsNullOrWhiteSpace(orderBy))
-        {
             return source;
-        }
 
         var orderByString = string.Empty;
         var orderByAfterSplit = orderBy.Split(',');
@@ -40,23 +37,17 @@ public static class IQueryableExtensions
 
             // find the matching property
             if (!mappingDictionary.ContainsKey(propertyName))
-            {
                 throw new ArgumentException($"Key mapping for {propertyName} is missing");
-            }
 
             // get the PropertyMappingValue
             var propertyMappingValue = mappingDictionary[propertyName];
 
             if (propertyMappingValue == null)
-            {
-                throw new ArgumentNullException(nameof(propertyMappingValue));
-            }
+                throw new ArgumentException($"The mapping value for '{propertyName}' is null.", nameof(mappingDictionary));
 
             // revert sort order if necessary
             if (propertyMappingValue.Revert)
-            {
                 orderDescending = !orderDescending;
-            }
 
             // Run through the property names 
             foreach (var destinationProperty in propertyMappingValue.DestinationProperties)

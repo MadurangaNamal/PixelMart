@@ -1,5 +1,9 @@
 ﻿namespace PixelMart.API.Helpers;
 
+/// <summary>
+/// This class represents the mapping between a source property and one or more destination properties, 
+/// along with an optional flag to indicate if the sort order should be reversed.
+/// </summary>
 public class PropertyMappingValue
 {
     public IEnumerable<string> DestinationProperties { get; private set; }
