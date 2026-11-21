@@ -30,7 +30,6 @@ public class ProductsController : ControllerBase
     private readonly RequestLogHelper _requestLogHelper;
     private readonly ICacheService _cacheService;
 
-#pragma warning disable S107
     public ProductsController(IPixelMartRepository pixelMartRepository,
         IProductsRepository productsRepository,
         ICategoriesRepository categoriesRepository,
@@ -39,7 +38,6 @@ public class ProductsController : ControllerBase
         IPropertyMappingService propertyMappingService,
         RequestLogHelper requestLogHelper,
         ICacheService cacheService)
-#pragma warning restore S107
     {
         _pixelMartRepository = pixelMartRepository ?? throw new ArgumentNullException(nameof(pixelMartRepository));
         _productsRepository = productsRepository ?? throw new ArgumentNullException(nameof(productsRepository));
@@ -65,7 +63,8 @@ public class ProductsController : ControllerBase
         if (!_propertyMappingService.ValidMappingExistsFor<ProductDto, Product>(productsResourceParameters.OrderBy))
             return BadRequest();
 
-        var productsFromRepo = await _productsRepository.GetProductsAsync(categoryId, productsResourceParameters, cancellationToken);
+        var productsFromRepo = await _productsRepository.GetProductsAsync(categoryId, productsResourceParameters
+            , cancellationToken);
 
         foreach (Product product in productsFromRepo)
         {
@@ -77,46 +76,26 @@ public class ProductsController : ControllerBase
         return Ok(productsResponse);
     }
 
-    [HttpGet("{productId}", Name = "GetProductForCategory")]
-    [OutputCache]
-    public async Task<ActionResult<ProductDto>> GetProductForCategory(Guid categoryId, Guid productId, CancellationToken cancellationToken)
+    [HttpGet("{productId}", Name = "GetProduct")]
+    public async Task<ActionResult<ProductDto>> GetProduct(Guid categoryId
+        , Guid productId, CancellationToken cancellationToken)
     {
-        _requestLogHelper.LogInfo($"GET /api/categories/{categoryId}/products/{productId} CALLED TO RETRIEVE SINGLE PRODUCT");
+        _requestLogHelper.LogInfo($"GET /api/categories/{categoryId}/products/{productId} " +
+            $"CALLED TO RETRIEVE PRODUCT DETAILS");
 
-        var cacheKey = _cacheService.GetCategoryProductKey(categoryId, productId);
+        var productDto = await _cacheService.GetOrCreateAsync<ProductDto?>(
+            CacheKeys.Product(categoryId, productId),
+            ct => LoadProductDtoAsync(categoryId, productId, ct),
+            cancellationToken: cancellationToken);
 
-        if (_cacheService.GetProductDto(cacheKey) is { } cachedProductDto)
-        {
-            _requestLogHelper.LogInfo($"Cache HIT for Product {productId} in Category {categoryId}");
-
-            return Ok(cachedProductDto);
-        }
-
-        var categoryExistsTask = _categoriesRepository.CategoryExistsAsync(categoryId, cancellationToken);
-        var productTask = _productsRepository.GetproductAsync(categoryId, productId, cancellationToken);
-
-        await Task.WhenAll(categoryExistsTask, productTask);
-
-        if (!categoryExistsTask.Result)
-            return NotFound();
-
-        var productFromRepo = productTask.Result;
-
-        if (productFromRepo == null)
-            return NotFound();
-
-        productFromRepo.Stock = await _stocksRepository.GetItemStockAsync(productFromRepo.Id, cancellationToken);
-
-        var productDto = _mapper.Map<ProductDto>(productFromRepo);
-        _cacheService.SetProductDto(cacheKey, productDto);
-        _requestLogHelper.LogInfo($"Cache MISS for Product {productId} in Category {categoryId}");
-
-        return Ok(productDto);
+        return productDto is null ? NotFound() : Ok(productDto);
     }
+
+
 
     [Authorize(Roles = $"{UserRoles.Admin}, {UserRoles.User}")]
     [HttpPost(Name = "CreateProductForCategory")]
-    public async Task<IActionResult> CreateProductForCategory(Guid categoryId, ProductForCreationDto product,
+    public async Task<IActionResult> CreateProduct(Guid categoryId, ProductForCreationDto product,
         CancellationToken cancellationToken)
     {
         _requestLogHelper.LogInfo($"POST /api/categories/{categoryId}/products CALLED TO ADD A NEW PRODUCT");
@@ -136,7 +115,7 @@ public class ProductsController : ControllerBase
 
     [Authorize(Roles = $"{UserRoles.Admin}, {UserRoles.User}")]
     [HttpPut("{productId}")]
-    public async Task<IActionResult> UpdateProductForCategory(Guid categoryId, Guid productId, ProductForUpdateDto product,
+    public async Task<IActionResult> UpdateProduct(Guid categoryId, Guid productId, ProductForUpdateDto product,
         CancellationToken cancellationToken)
     {
         _requestLogHelper.LogInfo($"PUT /api/categories/{categoryId}/products/{productId} CALLED TO UPDATE A PRODUCT");
@@ -168,7 +147,7 @@ public class ProductsController : ControllerBase
 
     [Authorize(Roles = $"{UserRoles.Admin}, {UserRoles.User}")]
     [HttpPatch("{productId}")]
-    public async Task<IActionResult> PartiallyUpdateProduct(
+    public async Task<IActionResult> UpdateProductPartial(
         Guid categoryId,
         Guid productId,
         JsonPatchDocument<ProductForUpdateDto> patchDocument,
@@ -216,7 +195,7 @@ public class ProductsController : ControllerBase
 
     [Authorize(Roles = UserRoles.Admin)]
     [HttpDelete("{productId}")]
-    public async Task<IActionResult> DeleteProductForCategory(Guid categoryId, Guid productId, CancellationToken cancellationToken)
+    public async Task<IActionResult> DeleteProduct(Guid categoryId, Guid productId, CancellationToken cancellationToken)
     {
         _requestLogHelper.LogInfo($"DELETE /api/categories/{categoryId}/products/{productId} CALLED TO DELETE A PRODUCT");
 
@@ -233,6 +212,30 @@ public class ProductsController : ControllerBase
         return NoContent();
     }
 
+    private async Task<ProductDto?> LoadProductDtoAsync(Guid categoryId
+        , Guid productId, CancellationToken cancellationToken)
+    {
+        _requestLogHelper.LogInfo($"Cache MISS for Product {productId} in Category {categoryId}");
+
+        var categoryExistsTask = _categoriesRepository.CategoryExistsAsync(categoryId, cancellationToken);
+        var productTask = _productsRepository.GetproductAsync(categoryId, productId, cancellationToken);
+
+        await Task.WhenAll(categoryExistsTask, productTask);
+
+        if (!await categoryExistsTask)
+            return null;
+
+        var productFromRepo = await productTask;
+
+        if (productFromRepo is null)
+            return null;
+
+        productFromRepo.Stock = await _stocksRepository.GetItemStockAsync(productFromRepo.Id, cancellationToken);
+
+        return _mapper.Map<ProductDto>(productFromRepo);
+    }
+
+    // Override the default ValidationProblem method to use custom behavior
     public override ActionResult ValidationProblem([ActionResultObjectValue] ModelStateDictionary modelStateDictionary)
     {
         var options = HttpContext.RequestServices

@@ -1,10 +1,14 @@
-﻿using PixelMart.API.Models.Product;
-
-namespace PixelMart.API.Services;
+﻿namespace PixelMart.API.Services;
 
 public interface ICacheService
 {
-    void SetProductDto(string key, ProductDto productDto, TimeSpan? expiry = null);
-    ProductDto? GetProductDto(string key);
-    string GetCategoryProductKey(Guid categoryId, Guid productId);
+    T? Get<T>(string key);
+    void Set<T>(string key, T value, TimeSpan? expiry = null);
+    void Remove(string key);
+
+    Task<T> GetOrCreateAsync<T>(
+        string key,
+        Func<CancellationToken, Task<T>> factory,
+        TimeSpan? expiry = null,
+        CancellationToken cancellationToken = default);
 }
