@@ -53,10 +53,7 @@ public class ProductsRepository : IProductsRepository
     public async Task<PagedList<Product>> GetProductsAsync(Guid categoryId, ProductsResourceParameters productsResourceParameters,
         CancellationToken cancellationToken = default)
     {
-        if (productsResourceParameters == null)
-        {
-            throw new ArgumentNullException(nameof(productsResourceParameters));
-        }
+        ArgumentNullException.ThrowIfNull(productsResourceParameters);
 
         var productsCollection = _dbContext.Products
             .Where(p => p.CategoryId == categoryId)
@@ -71,7 +68,6 @@ public class ProductsRepository : IProductsRepository
 
         if (!string.IsNullOrWhiteSpace(productsResourceParameters.OrderBy))
         {
-            // get property mapping dictionary
             var authorPropertyMappingDictionary = _propertyMappingService.GetPropertyMapping<ProductDto, Product>();
 
             productsCollection = productsCollection
@@ -104,8 +100,8 @@ public class ProductsRepository : IProductsRepository
                 .ApplySort(productsResourceParameters.OrderBy, authorPropertyMappingDictionary);
         }
 
-        return await PagedList<Product>.CreateAsync(productsCollection, productsResourceParameters.PageNumber,
-            productsResourceParameters.PageSize, cancellationToken);
+        return await PagedList<Product>.CreateAsync(productsCollection, productsResourceParameters.PageNumber
+            , productsResourceParameters.PageSize, cancellationToken);
     }
     public async Task AddProductAsync(Guid categoryId, Product product, CancellationToken cancellationToken = default)
     {

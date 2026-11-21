@@ -3,7 +3,7 @@ using PixelMart.API.Models.Identity;
 
 namespace PixelMart.API.Data;
 
-public class AppDbInitializer
+public static class AppDbInitializer
 {
     public static async Task SeedRolesToDb(IApplicationBuilder applicationBuilder)
     {

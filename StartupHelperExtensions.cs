@@ -168,9 +168,8 @@ internal static class StartupHelperExtensions
         builder.Services.AddControllers(configure =>
         {
             configure.ReturnHttpNotAcceptable = true;
-        })
-            .AddNewtonsoftJson() // Add JSON support
-            .AddXmlDataContractSerializerFormatters(); // Add XML support
+        }).AddNewtonsoftJson() // Add JSON support
+        .AddXmlDataContractSerializerFormatters(); // Add XML support
 
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen(c =>
@@ -218,7 +217,7 @@ internal static class StartupHelperExtensions
 
     public static async Task<WebApplication> ConfigurePipelineAsync(this WebApplication app)
     {
-        app.UseMiddleware<ExceptionHandlingMiddleware>();
+        app.UseMiddleware<GlobalExceptionHandler>();
 
         if (app.Environment.IsDevelopment())
         {
@@ -228,14 +227,15 @@ internal static class StartupHelperExtensions
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "PixelMart API V1");
                 c.RoutePrefix = "swagger";
+                c.ConfigObject.PersistAuthorization = true;
             });
         }
         else
         {
             app.UseHsts();
+            app.UseHttpsRedirection();
         }
 
-        app.UseHttpsRedirection();
         app.UseCors("AllowPixelMartWebApp");
         app.UseRateLimiter();
         app.UseAuthentication();

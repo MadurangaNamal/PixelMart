@@ -3,61 +3,56 @@
 namespace PixelMart.API.Helpers;
 
 /// <summary>
-/// Provides extension methods for IQueryable to apply sorting based on a given orderBy string and a property mapping dictionary.
+/// Provides extension methods for IQueryable to apply sorting based on a given orderBy string 
 /// </summary>
 public static class IQueryableExtensions
 {
-    public static IQueryable<T> ApplySort<T>(this IQueryable<T> source, string orderBy,
+    public static IQueryable<T> ApplySort<T>(this IQueryable<T> source,
+        string orderBy,
         Dictionary<string, PropertyMappingValue> mappingDictionary)
     {
-        if (source == null)
-            throw new ArgumentNullException(nameof(source));
-
-        if (mappingDictionary == null)
-            throw new ArgumentNullException(nameof(mappingDictionary));
+        ArgumentNullException.ThrowIfNull(source);
+        ArgumentNullException.ThrowIfNull(mappingDictionary);
 
         if (string.IsNullOrWhiteSpace(orderBy))
             return source;
 
-        var orderByString = string.Empty;
-        var orderByAfterSplit = orderBy.Split(',');
+        var orderByParts = orderBy
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .SelectMany(clause => BuildOrderByParts(clause, mappingDictionary));
 
-        // apply each orderby clause  
-        foreach (var orderByClause in orderByAfterSplit)
-        {
-            // trim the orderBy clause, as it might contain leading or trailing spaces. 
-            var trimmedOrderByClause = orderByClause.Trim();
+        var orderByString = string.Join(", ", orderByParts);
 
-            // if the sort option ends with with " desc", we order descending, ortherwise ascending
-            var orderDescending = trimmedOrderByClause.EndsWith(" desc");
+        return string.IsNullOrEmpty(orderByString)
+            ? source
+            : source.OrderBy(orderByString);
+    }
 
-            // remove " asc" or " desc" from the orderBy clause, so we get the property name
-            var indexOfFirstSpace = trimmedOrderByClause.IndexOf(" ");
-            var propertyName = indexOfFirstSpace == -1 ? trimmedOrderByClause : trimmedOrderByClause.Remove(indexOfFirstSpace);
+    private static IEnumerable<string> BuildOrderByParts(
+        string clause,
+        Dictionary<string, PropertyMappingValue> mappingDictionary)
+    {
+        var (propertyName, descending) = ParseClause(clause);
 
-            // find the matching property
-            if (!mappingDictionary.ContainsKey(propertyName))
-                throw new ArgumentException($"Key mapping for {propertyName} is missing");
+        if (!mappingDictionary.TryGetValue(propertyName, out var mapping) || mapping is null)
+            throw new ArgumentException($"Key mapping for '{propertyName}' is missing", nameof(mappingDictionary));
 
-            // get the PropertyMappingValue
-            var propertyMappingValue = mappingDictionary[propertyName];
+        if (mapping.Revert)
+            descending = !descending;
 
-            if (propertyMappingValue == null)
-                throw new ArgumentException($"The mapping value for '{propertyName}' is null.", nameof(mappingDictionary));
+        var direction = descending ? "descending" : "ascending";
 
-            // revert sort order if necessary
-            if (propertyMappingValue.Revert)
-                orderDescending = !orderDescending;
+        return mapping.DestinationProperties.Select(property => $"{property} {direction}");
+    }
 
-            // Run through the property names 
-            foreach (var destinationProperty in propertyMappingValue.DestinationProperties)
-            {
-                orderByString = orderByString + (string.IsNullOrWhiteSpace(orderByString) ? string.Empty : ", ")
-                    + destinationProperty + (orderDescending ? " descending" : " ascending");
-            }
-        }
+    private static (string PropertyName, bool Descending) ParseClause(string clause)
+    {
+        var parts = clause.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
-        return source.OrderBy(orderByString);
+        var descending = parts.Length > 1 &&
+                         parts[1].Equals("desc", StringComparison.OrdinalIgnoreCase);
+
+        return (parts[0], descending);
     }
 }
 

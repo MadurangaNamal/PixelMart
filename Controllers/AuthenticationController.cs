@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -12,6 +13,7 @@ using System.Text;
 
 namespace PixelMart.API.Controllers;
 
+[AllowAnonymous]
 [Route("api/auth")]
 [ApiController]
 public class AuthenticationController : ControllerBase
@@ -101,17 +103,26 @@ public class AuthenticationController : ControllerBase
             return BadRequest("Please, provide all required fields");
         }
 
-        var userExists = await _userManager.FindByEmailAsync(loginDto.EmailAddress);
+        var user = await _userManager.FindByEmailAsync(loginDto.EmailAddress);
 
-        if (userExists != null && await _userManager.CheckPasswordAsync(userExists, loginDto.Password))
+        if (user == null || !await _userManager.CheckPasswordAsync(user, loginDto.Password))
         {
-            var tokenValue = await GenerateJWTTokenAsync(userExists, null!);
-            return Ok(tokenValue);
+            _requestLogHelper.LogError(null!, "UNAUTHORIZED LOGIN ATTEMPT");
+            return Unauthorized();
         }
 
-        _requestLogHelper.LogError(null!, "UNAUTHORIZED LOGIN ATTEMPT");
+        if (User.Identity?.IsAuthenticated == true &&
+            User.FindFirstValue(ClaimTypes.NameIdentifier) == user.Id)
+        {
+            return Ok(new
+            {
+                Message = "You are already logged in.",
+                Email = user.Email
+            });
+        }
 
-        return Unauthorized();
+        var tokenValue = await GenerateJWTTokenAsync(user, null!);
+        return Ok(tokenValue);
     }
 
     [HttpPost("refresh-token")]
